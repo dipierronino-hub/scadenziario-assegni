@@ -4,133 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scadenziario Assegni</title>
-    <!-- Libreria PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* =========================================
-           STILI GENERALI E UI SCHERMO
+           STILI APPLICATIVI (SCHERMO)
            ========================================= */
-        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #eef2f5; color: #2c3e50; margin: 0; padding: 20px; }
-        .container { max-width: 1250px; margin: 0 auto; }
-        h2 { text-align: center; color: #1a252f; margin: 0 0 20px 0; font-size: 28px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #ecf0f1; color: #333; margin: 0; padding: 15px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h2 { text-align: center; color: #2c3e50; margin: 10px 0 20px 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
         
-        .card { background: #fff; padding: 20px 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid #3498db; }
-        .filter-card { background: #2c3e50; display: flex; align-items: center; gap: 15px; border-top: none; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid #3498db; }
+        .filter-card { background: #2c3e50; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: none; }
         
-        button { padding: 10px 18px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s, transform 0.1s; }
-        button:active { transform: scale(0.98); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        
+        button { padding: 10px 16px; font-size: 14px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
         .btn-primary { background-color: #3498db; color: white; height: 100%; }
-        .btn-primary:hover { background-color: #2980b9; }
-        .btn-secondary { background-color: #ecf0f1; color: #2c3e50; border: 1px solid #bdc3c7; width: 100%; margin-top: 15px; }
+        .btn-secondary { background-color: #e3e7e8; color: #2c3e50; border: 1px solid #bdc3c7; width: 100%; margin-top: 15px; }
         .btn-pdf { background-color: #e74c3c; color: white; }
-        .btn-print { background-color: #34495e; color: white; }
+        .btn-print { background-color: #2c3e50; color: white; border: 1px solid #fff; }
 
-        .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; }
-        .form-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
-        label { font-size: 0.85em; font-weight: 800; margin-bottom: 5px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { padding: 10px; font-size: 14px; border: 1px solid #bdc3c7; border-radius: 6px; background-color: #fcfcfc; font-family: inherit; color: #2c3e50; font-weight: 600; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+        .form-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; }
+        label { font-size: 0.85em; font-weight: 700; margin-bottom: 6px; color: #555; text-transform: uppercase; }
+        input, select { padding: 10px; font-size: 14px; border: 1px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; background-color: #fcfcfc; }
         input:focus, select:focus { outline: none; border-color: #3498db; background-color: #fff; box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
 
-        .filter-label { color: white; margin: 0; font-size: 1.1em; font-weight: bold;}
-        .filter-select { flex: 1; max-width: 400px; border: 2px solid #3498db; font-size: 15px; }
+        .filter-label { color: white; margin: 0; font-size: 1.1em; font-weight: bold; text-transform: uppercase; }
+        .filter-select { flex: 1; max-width: 400px; font-weight: bold; border: 2px solid #3498db; padding: 12px; font-size: 15px; }
 
-        .summary-section { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border-top: 5px solid #f39c12; }
-        .summary-section h3 { color: #d35400; margin-top: 0; margin-bottom: 15px; font-size: 1.2em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .summary-section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; border-top: 5px solid #f39c12; }
+        .summary-section h3 { color: #d35400; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; font-size: 1.1em; }
         .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 0.95em; }
-        .summary-table th, .summary-table td { border: 1px solid #bdc3c7; padding: 12px 15px; text-align: right; }
-        .summary-table th { background-color: #34495e; color: white; text-align: center; text-transform: uppercase; font-size: 0.9em; }
-        .summary-table td:first-child { text-align: left; font-weight: bold; background-color: #ecf0f1; }
+        .summary-table th, .summary-table td { border: 1px solid #bdc3c7; padding: 12px; text-align: right; }
+        .summary-table th { background-color: #34495e; color: white; text-align: center; }
+        .summary-table td:first-child { text-align: left; font-weight: bold; background-color: #ecf0f1; color: #2c3e50; }
         .col-emesso { background-color: #fdfefe; }
         .col-pagato { background-color: #e8f8f5; color: #27ae60; }
-        .col-residuo { background-color: #fdebd0; color: #d35400; font-weight: 900; font-size: 1.1em; }
+        .col-residuo { background-color: #fdebd0; color: #d35400; font-weight: 900; font-size: 1.05em; }
 
-        .month-group { background: #fff; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 35px; overflow: hidden; }
-        .month-header { background: #2c3e50; color: #fff; padding: 15px 20px; font-size: 1.3em; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+        .month-group { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; overflow: hidden; }
+        .month-header { background: #34495e; color: #fff; padding: 15px 20px; font-size: 1.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
         .header-pagati { background: #27ae60 !important; }
         
         .modern-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .modern-table th { background-color: #bdc3c7; color: #2c3e50; font-weight: 900; font-size: 0.85em; text-transform: uppercase; padding: 12px 10px; text-align: left; border-bottom: 3px solid #7f8c8d; }
+        .modern-table th { background-color: #ecf0f1; color: #2c3e50; font-weight: 800; font-size: 0.85em; text-transform: uppercase; padding: 14px 10px; border-bottom: 3px solid #95a5a6; text-align: left; }
         
-        .col-data { width: 110px; }
+        .col-data { width: 100px; }
         .col-banca { width: 160px; }
-        .col-numero { width: 100px; }
+        .col-numero { width: 90px; }
         .col-benef { width: auto; }
         .col-causale { width: auto; }
-        .col-importo { width: 130px; text-align: right; }
-        .col-azione { width: 85px; text-align: center; }
+        .col-importo { width: 120px; text-align: right; }
+        .col-azione { width: 80px; text-align: center; }
         
-        .modern-table td { padding: 5px 8px; border-bottom: 1px solid #aeb6bf; vertical-align: middle; }
+        .modern-table td { padding: 10px; border-bottom: 2px solid #aeb6bf; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
         .modern-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-        .modern-table tbody tr:nth-child(even) { background-color: #eaf2f8; } 
-        .modern-table tbody tr:hover { background-color: #d4e6f1; } 
+        .modern-table tbody tr:nth-child(even) { background-color: #e3f0f9; }
+        .modern-table tbody tr:hover { background-color: #cce5ff; }
         
-        .row-pagato:nth-child(odd) { background-color: #eafaf1 !important; }
-        .row-pagato:nth-child(even) { background-color: #d5f5e3 !important; }
-        .row-pagato td { border-bottom: 1px solid #abebc6 !important; }
+        .row-pagato:nth-child(odd) { background-color: #e8f8f5 !important; }
+        .row-pagato:nth-child(even) { background-color: #d1f2eb !important; }
+        .row-pagato td { border-bottom: 2px solid #a3e4d7 !important; color: #7f8c8d; }
         .row-pagato .edit-input { color: #7f8c8d; }
         .row-pagato .date-input { background-color: #27ae60 !important; }
-        .row-pagato .edit-amount { color: #27ae60 !important; text-decoration: line-through; opacity: 0.7; }
+        .row-pagato .edit-amount { color: #27ae60 !important; text-decoration: line-through; opacity: 0.8; }
         
-        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-size: 0.95em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 1em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .edit-input:hover { border-color: #95a5a6; background: #fff; }
+        .edit-input:focus { border-color: #3498db; background: #fff; outline: none; }
         
-        .causale-text { font-size: 0.85em !important; font-weight: 600; color: #555; }
-        .edit-amount { text-align: right; font-weight: 900; color: #c0392b; font-size: 1.1em; }
-        .date-input { background: #e74c3c; color: white; font-weight: bold; text-align: center; border-radius: 4px; padding: 6px; }
+        .causale-text { font-size: 0.82em !important; line-height: 1.2; font-weight: 500; }
+        .edit-amount { text-align: right; font-weight: 900; color: #e74c3c; font-size: 1.1em; }
+        .date-input { background: #e74c3c; color: white; font-weight: bold; text-align: center; border-radius: 4px; padding: 6px; font-size: 0.95em; }
         
-        .action-cell { display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; }
-        .cb-label { font-size: 0.8em; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #2c3e50; background: #fff; padding: 4px; border-radius: 4px; width: 100%; box-sizing: border-box; justify-content: center; border: 1px solid #bdc3c7; }
-        .cb-label input { cursor: pointer; transform: scale(1.2); margin: 0; }
-        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 4px; font-size: 0.75em; width: 100%; border-radius: 4px; font-weight: bold; }
+        .action-cell { display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; }
+        .cb-label { font-size: 0.85em; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #2c3e50; background: #ecf0f1; padding: 4px 8px; border-radius: 4px; width: 100%; box-sizing: border-box; justify-content: center; border: 1px solid #bdc3c7; }
+        .cb-label input { cursor: pointer; transform: scale(1.3); margin: 0; }
+        .delete-btn { color: #fff; background-color: #c0392b; padding: 6px 10px; font-size: 0.8em; border-radius: 4px; font-weight: bold; width: 100%; margin: 0; }
         
-        .total-row td { padding: 15px 20px; background: #fdfefe; text-align: right; font-weight: 900; font-size: 1.25em; color: #c0392b; border-top: 3px solid #e74c3c; }
+        .total-row td { padding: 18px 20px; background: #fdfefe; text-align: right; font-weight: 900; font-size: 1.3em; color: #c0392b; border-top: 3px solid #e74c3c; }
         .total-row-pagati td { border-top: 3px solid #27ae60 !important; color: #27ae60; }
+        
+        /* Contenitore per overflow su schermo */
+        .table-wrapper { overflow-x: auto; width: 100%; }
 
         .print-only { display: none; }
+        .print-mode .no-print { display: none !important; }
+        .print-mode .print-only { display: inline-block !important; }
 
         /* =========================================
-           STILI RIGOROSI PER ESPORTAZIONE (STAMPA/PDF)
+           STILI RIGOROSI PER STAMPA E PDF
            ========================================= */
-        .export-mode { width: 1100px !important; max-width: 1100px !important; margin: 0 !important; padding: 15px !important; background: #fff; }
-        .export-mode .no-print { display: none !important; }
-        
-        /* I testi non vengono MAI tagliati: white-space normal li fa andare a capo */
-        .export-mode .print-only { display: inline-block !important; width: 100%; white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; vertical-align: middle; }
-        
-        .export-mode .card, .export-mode .summary-section, .export-mode .month-group { box-shadow: none !important; border: 1px solid #999 !important; margin-bottom: 20px !important; }
-        
-        .export-mode .modern-table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; }
-        
-        /* Percentuali perfette per A4 orizzontale */
-        .export-mode .col-data    { width: 9% !important; }
-        .export-mode .col-banca   { width: 18% !important; }
-        .export-mode .col-numero  { width: 11% !important; }
-        .export-mode .col-benef   { width: 24% !important; }
-        .export-mode .col-causale { width: 25% !important; }
-        .export-mode .col-importo { width: 13% !important; text-align: right !important; padding-right: 10px !important; }
-        .export-mode .col-azione  { display: none !important; }
-
-        .export-mode .modern-table td { padding: 8px 6px !important; font-size: 11px !important; border-bottom: 1px solid #ccc !important; background: none !important; vertical-align: top; }
-        .export-mode .modern-table th { padding: 10px 6px !important; font-size: 10px !important; background-color: #eee !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
-        .export-mode .total-row td { font-size: 13px !important; color: #000 !important; border-top: 2px solid #000 !important; }
-        .export-mode .summary-table th, .export-mode .summary-table td { padding: 6px !important; font-size: 11px !important; }
-        
-        /* Media query nativa per la stampa dal browser (Stampa Rapida) */
         @media print {
-            body { padding: 0; background: #fff; }
+            @page { 
+                size: A4 landscape; 
+                margin: 10mm; 
+            }
+            
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body { background: #fff; padding: 0; margin: 0; width: 100%; font-size: 11px; }
+            
+            /* Rimozione di limiti, scroll e ombre */
+            .container, .main-container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
+            .card, .summary-section, .month-group, .filter-card { 
+                box-shadow: none !important; 
+                border-radius: 0 !important; 
+                border: none !important; 
+                margin-bottom: 20px !important; 
+            }
+            
+            /* Eliminazione Overflow per evitare il taglio a sinistra/destra */
+            div, .table-wrapper, [style*="overflow"] { 
+                overflow: visible !important; 
+                width: 100% !important; 
+            }
+            
+            /* Forzatura del layout tabellare e ripetizione intestazioni */
+            table, .modern-table, .summary-table { 
+                width: 100% !important; 
+                table-layout: auto !important; 
+                border-collapse: collapse !important; 
+            }
+            thead { display: table-header-group !important; }
+            tfoot { display: table-footer-group !important; }
+            tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            .month-group { page-break-inside: auto !important; break-inside: auto !important; }
+            
+            /* Titoli visibili col colore forzato */
+            .month-header { 
+                background-color: #34495e !important; 
+                color: #ffffff !important; 
+                padding: 10px 15px !important; 
+                font-size: 14px !important; 
+                font-weight: bold !important; 
+                border: 1px solid #000;
+                border-bottom: none;
+            }
+            .header-pagati { background-color: #27ae60 !important; }
+            .summary-section h3 { color: #000 !important; }
+
+            /* Testi di riga completamente visibili e bordi neri */
+            .modern-table td, .modern-table th, .summary-table td, .summary-table th { 
+                border: 1px solid #000 !important; 
+                padding: 6px 8px !important; 
+                font-size: 11px !important; 
+                background: transparent !important;
+                color: #000 !important;
+                white-space: normal !important; 
+                word-wrap: break-word !important;
+                overflow: visible !important;
+            }
+            .modern-table th { background-color: #f0f0f0 !important; font-weight: bold !important; }
+            .summary-table th { background-color: #e0e0e0 !important; color: #000 !important; }
+            
+            /* Elementi grafici da stampare */
+            .print-only { 
+                display: inline-block !important; 
+                width: 100% !important; 
+                white-space: normal !important; 
+                overflow: visible !important; 
+                text-overflow: clip !important; 
+            }
             .no-print { display: none !important; }
-            .print-only { display: inline-block !important; width: 100%; white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; vertical-align: middle; }
-            .container { max-width: 100%; width: 100%; margin: 0; }
-            .card, .summary-section, .month-group { box-shadow: none; border: 1px solid #999; margin-bottom: 20px; page-break-inside: avoid; }
-            .modern-table { table-layout: fixed; width: 100%; }
-            .col-data { width: 9%; } .col-banca { width: 18%; } .col-numero { width: 11%; } .col-benef { width: 24%; } .col-causale { width: 25%; } .col-importo { width: 13%; padding-right: 10px; text-align: right; }
-            .col-azione { display: none; }
-            .modern-table td { padding: 6px 4px; font-size: 11px; border-bottom: 1px solid #ccc; background: none !important; vertical-align: top; }
-            .modern-table th { padding: 8px 4px; font-size: 10px; background-color: #eee !important; color: #000; border-bottom: 2px solid #000; }
-            .total-row td { font-size: 12px; color: #000; border-top: 2px solid #000; }
-            .summary-table th, .summary-table td { padding: 6px; font-size: 11px; }
-            .month-header { padding: 8px 12px; font-size: 14px; background: #eee !important; color: #000; border-bottom: 1px solid #000; }
+            
+            .total-row td { 
+                font-weight: bold !important; 
+                border-top: 2px solid #000 !important; 
+                background-color: #f9f9f9 !important; 
+            }
+            
+            /* Rimuove le dimensioni fisse che sfasano la stampa */
+            .col-data, .col-banca, .col-numero, .col-importo, .col-benef, .col-causale { width: auto !important; }
         }
     </style>
 </head>
@@ -138,17 +188,17 @@
 
 <div class="container" id="main-container">
     <div class="toolbar no-print">
-        <h2>Contabilità Assegni</h2>
+        <h2>Gestione Assegni</h2>
         <div style="display: flex; gap: 10px;">
-            <button class="btn-print" onclick="window.print()">🖨️ Stampa Rapida</button>
-            <button class="btn-pdf" onclick="scaricaPDFPuro()">📄 Genera PDF Ufficiale</button>
+            <button class="btn-print" onclick="window.print()">🖨️ Stampa Documento</button>
+            <button class="btn-pdf" onclick="scaricaPDF()">📄 Salva come PDF</button>
         </div>
     </div>
 
     <datalist id="lista-beneficiari"></datalist>
 
     <div class="card filter-card no-print">
-        <label class="filter-label">👁️ Filtro Scadenze:</label>
+        <label class="filter-label">👁️ Visualizza:</label>
         <select id="filtro-banca" class="filter-select" onchange="renderScadenziario()">
             <option value="TUTTE">TUTTE LE BANCHE INSIEME</option>
         </select>
@@ -158,11 +208,11 @@
         <form id="checkForm">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Scadenza</label>
+                    <label>Data Scadenza</label>
                     <input type="date" id="data" required>
                 </div>
                 <div class="form-group">
-                    <label>Importo (€)</label>
+                    <label>Importo</label>
                     <input type="number" id="importo" step="0.01" min="0" placeholder="Es. 1500.50" required>
                 </div>
                 <div class="form-group" style="flex: 1.5;">
@@ -189,11 +239,7 @@
                 </div>
             </div>
         </form>
-        <button class="btn-secondary" onclick="aggiungiBanca()">+ Nuova Banca in Rubrica</button>
-    </div>
-
-    <div id="pdf-header-title" class="print-only" style="text-align: center; font-size: 22px; font-weight: bold; padding: 10px; margin-bottom: 20px; border-bottom: 2px solid #000;">
-        Situazione Contabile Assegni
+        <button class="btn-secondary" onclick="aggiungiBanca()">+ Aggiungi Nuova Banca in Rubrica</button>
     </div>
 
     <div id="riepilogo-contabile" class="summary-section"></div>
@@ -201,7 +247,7 @@
     <div id="scadenziario-da-pagare"></div>
 
     <div id="sezione-pagati" style="display: none;">
-        <h2 style="color: #27ae60; margin-top: 30px; border-bottom: 4px solid #27ae60; padding-bottom: 10px; font-size: 22px;">✅ Storico Pagati</h2>
+        <h2 style="color: #27ae60; margin-top: 40px; border-bottom: 4px solid #27ae60; padding-bottom: 10px; text-align: left; font-size: 24px;">✅ Storico Assegni Pagati</h2>
         <div id="scadenziario-pagati"></div>
     </div>
 </div>
@@ -211,16 +257,16 @@
     let banks = JSON.parse(localStorage.getItem('assegni_banks')) || [bancaPredefinita, "Banca Popolare Pugliese"];
     let checks = JSON.parse(localStorage.getItem('assegni_data')) || [];
 
-    // Allineamento dati sulla banca corretta
     if (!localStorage.getItem('force_bppb_v4')) {
         checks.forEach(c => { c.banca = bancaPredefinita; });
         localStorage.setItem('force_bppb_v4', 'true');
         localStorage.setItem('assegni_data', JSON.stringify(checks));
     }
     
-    checks.forEach(c => { if(typeof c.pagato === 'undefined') c.pagato = false; });
+    checks.forEach(c => {
+        if(typeof c.pagato === 'undefined') c.pagato = false;
+    });
 
-    // Caricamento Dati Massivi iniziali
     if (checks.length === 0) {
         const assegniMassivi = [
             { id: "m1", data: "2026-09-30", importo: 2360.37, banca: bancaPredefinita, numero: "72802", beneficiario: "ADESITAL SPA", causale: "FT. N. 3613 DEL 12/06/25+4078+1897", pagato: false },
@@ -307,6 +353,7 @@
         const datalist = document.getElementById('lista-beneficiari');
         if(!datalist) return;
         datalist.innerHTML = '';
+        
         const nomiUnivoci = [...new Set(checks.map(c => c.beneficiario.trim()))].filter(n => n !== '');
         nomiUnivoci.sort().forEach(nome => {
             let option = document.createElement('option');
@@ -318,6 +365,7 @@
     function aggiornaSelectBanche() {
         const selectInsert = document.getElementById('banca');
         const selectFilter = document.getElementById('filtro-banca');
+        
         const currentFilter = selectFilter.value;
         
         selectInsert.innerHTML = '';
@@ -426,57 +474,74 @@
 
         let htmlMensile = `
             <h3>Situazione Mensile</h3>
-            <table class="summary-table">
-                <thead>
-                    <tr><th>Mese</th><th class="col-emesso">Totale Emesso</th><th class="col-pagato">Già Pagato</th><th class="col-residuo">DA PAGARE (Residuo)</th></tr>
-                </thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Mese</th>
+                            <th class="col-emesso">Totale Emesso</th>
+                            <th class="col-pagato">Già Pagato</th>
+                            <th class="col-residuo">DA PAGARE (Residuo)</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
         
         const sortedMonths = Object.keys(totalsByMonth).sort((a, b) => totalsByMonth[a].dateObj - totalsByMonth[b].dateObj);
         sortedMonths.forEach(month => {
-            htmlMensile += `<tr><td>${month}</td><td class="col-emesso">${formatCurrency(totalsByMonth[month].emesso)}</td><td class="col-pagato">${formatCurrency(totalsByMonth[month].pagato)}</td><td class="col-residuo">${formatCurrency(totalsByMonth[month].residuo)}</td></tr>`;
+            htmlMensile += `
+                <tr>
+                    <td>${month}</td>
+                    <td class="col-emesso">${formatCurrency(totalsByMonth[month].emesso)}</td>
+                    <td class="col-pagato">${formatCurrency(totalsByMonth[month].pagato)}</td>
+                    <td class="col-residuo">${formatCurrency(totalsByMonth[month].residuo)}</td>
+                </tr>`;
         });
-        htmlMensile += `</tbody></table>`;
+        htmlMensile += `</tbody></table></div>`;
 
         let htmlAnnuale = `
             <h3>Situazione Annuale</h3>
-            <table class="summary-table">
-                <thead><tr><th>Anno</th><th class="col-emesso">Totale Emesso</th><th class="col-pagato">Già Pagato</th><th class="col-residuo">DA PAGARE (Residuo)</th></tr></thead>
-                <tbody>`;
+            <div class="table-wrapper">
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Anno</th>
+                            <th class="col-emesso">Totale Emesso</th>
+                            <th class="col-pagato">Già Pagato</th>
+                            <th class="col-residuo">DA PAGARE (Residuo)</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
                 
         Object.keys(totalsByYear).sort().forEach(year => {
-            htmlAnnuale += `<tr><td>${year}</td><td class="col-emesso">${formatCurrency(totalsByYear[year].emesso)}</td><td class="col-pagato">${formatCurrency(totalsByYear[year].pagato)}</td><td class="col-residuo">${formatCurrency(totalsByYear[year].residuo)}</td></tr>`;
+            htmlAnnuale += `
+                <tr>
+                    <td>${year}</td>
+                    <td class="col-emesso">${formatCurrency(totalsByYear[year].emesso)}</td>
+                    <td class="col-pagato">${formatCurrency(totalsByYear[year].pagato)}</td>
+                    <td class="col-residuo">${formatCurrency(totalsByYear[year].residuo)}</td>
+                </tr>`;
         });
-        htmlAnnuale += `</tbody></table>`;
+        htmlAnnuale += `</tbody></table></div>`;
 
         container.innerHTML = htmlMensile + htmlAnnuale;
     }
 
-    // =========================================================================
-    // MOTORE PDF SICURO: Usa le classi CSS per mostrare i testi puri senza input
-    // =========================================================================
-    function scaricaPDFPuro() {
+    // Configurazione aggiornata html2pdf
+    function scaricaPDF() {
         const container = document.getElementById('main-container');
+        container.classList.add('print-mode');
         
-        // Applica la classe per forzare la vista "PDF" (rimuove input, espande testo)
-        container.classList.add('export-mode');
-        
-        // Titolo dinamico in base al filtro
-        const filtro = document.getElementById('filtro-banca').value;
-        document.getElementById('pdf-header-title').innerText = "Contabilità Assegni - " + filtro;
-
         const opt = {
-            margin:       [10, 10, 10, 10], // Margini uniformi
+            margin:       [10, 10, 10, 10],
             filename:     'contabilita-assegni.pdf',
-            image:        { type: 'jpeg', quality: 1 },
-            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1100 }, 
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1200 },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
             pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
         };
         
         html2pdf().set(opt).from(container).save().then(() => {
-            // Rimuove la classe PDF e ripristina la visualizzazione a schermo
-            container.classList.remove('export-mode');
+            container.classList.remove('print-mode');
         });
     }
 
@@ -497,7 +562,7 @@
         containerPagati.innerHTML = '';
 
         if (checksToRender.length === 0) {
-            containerDaPagare.innerHTML = '<p style="text-align:center; padding: 20px; font-weight:bold;">Nessun assegno trovato per questa selezione.</p>';
+            containerDaPagare.innerHTML = '<p style="text-align:center; padding: 20px;">Nessun assegno trovato per questa selezione.</p>';
             sezionePagati.style.display = 'none';
             return;
         }
@@ -538,7 +603,7 @@
             let html = `
             <div class="month-group">
                 <div class="month-header ${headerClass}">${month}</div>
-                <div style="overflow-x: auto;">
+                <div class="table-wrapper">
                     <table class="modern-table">
                         <thead>
                             <tr>
@@ -566,7 +631,7 @@
                             <tr class="${rowClass}">
                                 <td class="col-data">
                                     <input type="date" class="edit-input date-input no-print" value="${c.data}" onchange="aggiornaCampo('${c.id}', 'data', this.value)">
-                                    <span class="print-only">${formatDate(c.data)}</span>
+                                    <span class="print-only" style="font-weight:bold;">${formatDate(c.data)}</span>
                                 </td>
                                 <td class="col-banca">
                                     ${rowSelectHtml}
@@ -578,11 +643,11 @@
                                 </td>
                                 <td class="col-benef">
                                     <input type="text" class="edit-input no-print" list="lista-beneficiari" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
-                                    <span class="print-only">${c.beneficiario}</span>
+                                    <span class="print-only" title="${c.beneficiario}">${c.beneficiario}</span>
                                 </td>
                                 <td class="col-causale">
                                     <input type="text" class="edit-input causale-text no-print" value="${c.causale || ''}" title="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
-                                    <span class="print-only causale-text">${c.causale || ''}</span>
+                                    <span class="print-only causale-text" title="${c.causale || ''}">${c.causale || ''}</span>
                                 </td>
                                 <td class="col-importo">
                                     <input type="text" class="edit-input edit-amount no-print" value="${formatCurrency(c.importo)}" onchange="aggiornaCampo('${c.id}', 'importo', this.value)">
@@ -604,7 +669,8 @@
                         <tfoot>
                             <tr class="total-row ${totalRowClass}">
                                 <td colspan="5">Totale ${isPagato ? 'Pagato' : 'DA PAGARE'} ${month}:</td>
-                                <td colspan="2">${formatCurrency(totaleMese)}</td>
+                                <td>${formatCurrency(totaleMese)}</td>
+                                <td class="no-print"></td>
                             </tr>
                         </tfoot>
                     </table>
