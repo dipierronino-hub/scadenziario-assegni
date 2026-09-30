@@ -50,11 +50,20 @@
         .month-header { background: #34495e; color: #fff; padding: 15px 20px; font-size: 1.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
         .header-pagati { background: #27ae60 !important; }
         
-        .modern-table { width: 100%; border-collapse: collapse; }
+        .modern-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .modern-table th { background-color: #ecf0f1; color: #2c3e50; font-weight: 800; font-size: 0.85em; text-transform: uppercase; padding: 14px 10px; border-bottom: 3px solid #95a5a6; text-align: left; }
         
+        /* Larghezze Colonne */
+        .col-data { width: 100px; }
+        .col-banca { width: 160px; }
+        .col-numero { width: 90px; }
+        .col-benef { width: auto; }
+        .col-causale { width: auto; }
+        .col-importo { width: 120px; text-align: right; }
+        .col-azione { width: 80px; text-align: center; }
+        
         /* Contrasto Righe (Zebra) */
-        .modern-table td { padding: 10px; border-bottom: 2px solid #aeb6bf; vertical-align: middle; }
+        .modern-table td { padding: 10px; border-bottom: 2px solid #aeb6bf; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
         .modern-table tbody tr:nth-child(odd) { background-color: #ffffff; }
         .modern-table tbody tr:nth-child(even) { background-color: #e3f0f9; }
         .modern-table tbody tr:hover { background-color: #cce5ff; }
@@ -68,7 +77,7 @@
         .row-pagato .edit-amount { color: #27ae60 !important; text-decoration: line-through; opacity: 0.8; }
         
         /* Campi Modificabili */
-        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 1em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; font-weight: 600; }
+        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 1em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .edit-input:hover { border-color: #95a5a6; background: #fff; }
         .edit-input:focus { border-color: #3498db; background: #fff; outline: none; }
         
@@ -89,19 +98,28 @@
         /* Stampa / PDF */
         .print-only { display: none; }
         .print-mode .no-print { display: none !important; }
-        .print-mode .print-only { display: inline-block !important; }
-        .print-mode .modern-table td { padding: 8px 6px; font-size: 12px; border-bottom: 1px solid #ccc; }
-        .print-mode .modern-table th { padding: 10px 6px; font-size: 11px; }
+        .print-mode .print-only { display: inline-block !important; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .print-mode .modern-table td { padding: 6px 4px; font-size: 10px; border-bottom: 1px solid #ccc; line-height: 1.1;}
+        .print-mode .modern-table th { padding: 8px 4px; font-size: 9px; }
+        .print-mode .col-data { width: 65px; }
+        .print-mode .col-banca { width: 120px; }
+        .print-mode .col-numero { width: 60px; }
+        .print-mode .col-importo { width: 80px; }
         
         @media print {
             body { background: #fff; padding: 0; }
             .no-print { display: none !important; }
-            .print-only { display: inline-block !important; }
+            .print-only { display: inline-block !important; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
             .container { max-width: 100%; margin: 0; }
             .card, .summary-section, .month-group { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 20px; }
-            .modern-table td { padding: 8px 6px; font-size: 11px; border-bottom: 1px solid #000; background: none !important; }
-            .modern-table th { padding: 10px 6px; font-size: 10px; background-color: #eee !important; color: #000; }
-            .summary-table th, .summary-table td { padding: 6px; font-size: 11px; }
+            .modern-table { table-layout: fixed; width: 100%; }
+            .modern-table td { padding: 6px 4px; font-size: 10px; border-bottom: 1px solid #000; background: none !important; line-height: 1.1; overflow: hidden;}
+            .modern-table th { padding: 8px 4px; font-size: 9px; background-color: #eee !important; color: #000; }
+            .summary-table th, .summary-table td { padding: 6px; font-size: 10px; }
+            .col-data { width: 65px; }
+            .col-banca { width: 120px; }
+            .col-numero { width: 60px; }
+            .col-importo { width: 80px; }
         }
     </style>
 </head>
@@ -278,7 +296,6 @@
         renderScadenziario();
     }
 
-    // Estrae tutti i beneficiari univoci e riempie la Datalist
     function aggiornaListaBeneficiari() {
         const datalist = document.getElementById('lista-beneficiari');
         if(!datalist) return;
@@ -368,7 +385,7 @@
 
     function saveAndRender() {
         localStorage.setItem('assegni_data', JSON.stringify(checks));
-        aggiornaListaBeneficiari(); // Aggiorna i nomi se ne hai inserito uno nuovo
+        aggiornaListaBeneficiari(); 
         renderScadenziario();
     }
 
@@ -459,7 +476,7 @@
         container.classList.add('print-mode');
         
         const opt = {
-            margin:       [10, 10, 10, 10],
+            margin:       [5, 5, 5, 5],
             filename:     'contabilita-assegni.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
@@ -534,13 +551,13 @@
                     <table class="modern-table">
                         <thead>
                             <tr>
-                                <th style="width: 110px;">Data</th>
-                                <th style="width: 200px;">Banca</th>
-                                <th style="width: 110px;">N° Assegno</th>
-                                <th>Beneficiario</th>
-                                <th>Causale</th>
-                                <th style="width: 140px; text-align: right;">Importo</th>
-                                <th style="width: 90px; text-align: center;" class="no-print">Stato</th>
+                                <th class="col-data">Data</th>
+                                <th class="col-banca">Banca</th>
+                                <th class="col-numero">N° Assegno</th>
+                                <th class="col-benef">Beneficiario</th>
+                                <th class="col-causale">Causale</th>
+                                <th class="col-importo">Importo</th>
+                                <th class="col-azione no-print">Stato</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -554,34 +571,33 @@
                 banks.forEach(b => { rowSelectHtml += `<option value="${b}" ${c.banca === b ? 'selected' : ''}>${b}</option>`; });
                 rowSelectHtml += `</select>`;
 
-                // Aggiunta list="lista-beneficiari" e classe "causale-text"
                 html += `
                             <tr class="${rowClass}">
-                                <td>
+                                <td class="col-data">
                                     <input type="date" class="edit-input date-input no-print" value="${c.data}" onchange="aggiornaCampo('${c.id}', 'data', this.value)">
                                     <span class="print-only" style="font-weight:bold;">${formatDate(c.data)}</span>
                                 </td>
-                                <td>
+                                <td class="col-banca">
                                     ${rowSelectHtml}
                                     <span class="print-only">${c.banca}</span>
                                 </td>
-                                <td>
+                                <td class="col-numero">
                                     <input type="text" class="edit-input no-print" value="${c.numero}" onchange="aggiornaCampo('${c.id}', 'numero', this.value)">
                                     <span class="print-only">${c.numero}</span>
                                 </td>
-                                <td>
+                                <td class="col-benef">
                                     <input type="text" class="edit-input no-print" list="lista-beneficiari" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
-                                    <span class="print-only">${c.beneficiario}</span>
+                                    <span class="print-only" title="${c.beneficiario}">${c.beneficiario}</span>
                                 </td>
-                                <td>
+                                <td class="col-causale">
                                     <input type="text" class="edit-input causale-text no-print" value="${c.causale || ''}" title="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
-                                    <span class="print-only causale-text">${c.causale || ''}</span>
+                                    <span class="print-only causale-text" title="${c.causale || ''}">${c.causale || ''}</span>
                                 </td>
-                                <td style="text-align: right;">
+                                <td class="col-importo">
                                     <input type="text" class="edit-input edit-amount no-print" value="${formatCurrency(c.importo)}" onchange="aggiornaCampo('${c.id}', 'importo', this.value)">
                                     <span class="print-only edit-amount">${formatCurrency(c.importo)}</span>
                                 </td>
-                                <td class="no-print">
+                                <td class="col-azione no-print">
                                     <div class="action-cell">
                                         <label class="cb-label">
                                             <input type="checkbox" onchange="togglePagato('${c.id}', this.checked)" ${c.pagato ? 'checked' : ''}> Pagato
