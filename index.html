@@ -9,9 +9,8 @@ body{font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#ecf0f1
 .container{max-width:1200px;margin:0 auto}
 h2{color:#2c3e50;margin:10px 0;font-size:26px;text-transform:uppercase;letter-spacing:1px}
 .card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:20px;border-top:5px solid #3498db}
-.filter-card{background:#2c3e50;padding:15px 20px;display:flex;align-items:center;gap:15px;flex-wrap:wrap;border:none}
-.filter-label{color:#fff;font-weight:700;margin:0}
-.filter-card select,.filter-card input{flex:1;min-width:180px;max-width:380px;font-weight:700;border:2px solid #3498db;padding:11px}
+.filter-card{background:#2c3e50;padding:15px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:none}
+.filter-card select,.filter-card input{flex:1;min-width:170px;font-weight:700;border:2px solid #3498db;padding:11px}
 .toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .tb-btns{display:flex;gap:8px;flex-wrap:wrap}
 button{padding:10px 14px;font-size:14px;border:1px solid transparent;border-radius:6px;cursor:pointer;font-weight:700}
@@ -25,9 +24,9 @@ label{font-size:.85em;font-weight:700;margin-bottom:6px;color:#555;text-transfor
 input,select{padding:10px;font-size:14px;border:1px solid #bdc3c7;border-radius:6px;box-sizing:border-box;background:#fcfcfc}
 input:focus,select:focus{outline:none;border-color:#3498db;box-shadow:0 0 0 3px rgba(52,152,219,.2)}
 .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-.stat{flex:1;min-width:200px;background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.08);font-weight:700;color:#2c3e50}
+.stat{flex:1;min-width:190px;background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.08);font-weight:700;color:#2c3e50}
 .stat b{display:block;font-size:1.3em;margin-top:4px}
-.stat.red b{color:#c0392b}.stat.amber b{color:#d35400}
+.stat.red b{color:#c0392b}.stat.amber b{color:#d35400}.stat.green b{color:#27ae60}
 .summary-section{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:30px;border-top:5px solid #f39c12}
 .summary-section h3{color:#d35400;margin:0 0 15px;text-transform:uppercase;font-size:1.1em}
 .summary-table{width:100%;border-collapse:collapse;margin-bottom:25px}
@@ -62,9 +61,11 @@ input:focus,select:focus{outline:none;border-color:#3498db;box-shadow:0 0 0 3px 
 .delete-btn{background:#c0392b;color:#fff;padding:5px;font-size:.8em;width:100%}
 .total-row td{padding:16px 20px;text-align:right;font-weight:900;font-size:1.25em;color:#c0392b;border-top:3px solid #e74c3c}
 .total-row.pg td{color:#27ae60;border-top-color:#27ae60}
+.total-row.saldo td{padding:10px 20px;font-size:1.05em;color:#27ae60;border-top:1px dashed #95a5a6}
+.total-row.saldo.neg td{color:#c0392b;background:#fdecea}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:12px 18px;border-radius:8px;display:none;gap:14px;align-items:center;z-index:9}
 #toast button{background:#f39c12;color:#fff;padding:6px 12px}
-.po{display:none}
+.po,.ph{display:none}
 @media print{
 @page{size:A4 landscape;margin:10mm}
 *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -72,6 +73,7 @@ body{background:#fff;padding:0;font-size:11px}
 .container{max-width:none}
 .no-print{display:none!important}
 .po{display:inline}
+.ph{display:block;font-size:12px;font-weight:700;margin-bottom:10px}
 .summary-section,.month-group{box-shadow:none;border:none;border-radius:0;margin-bottom:16px;overflow:visible}
 .table-wrapper{overflow:visible}
 .modern-table{min-width:0;table-layout:auto}
@@ -79,13 +81,13 @@ thead{display:table-header-group}
 tfoot{display:table-row-group}
 tr{break-inside:avoid}
 .month-header{padding:8px 12px;font-size:14px;break-after:avoid}
-.modern-table td,.modern-table th,.summary-table td,.summary-table th{border:1px solid #000;padding:5px 7px;font-size:11px;color:#000;background:transparent!important;word-wrap:break-word}
+.modern-table td,.modern-table th,.summary-table td,.summary-table th{border:1px solid #000;padding:5px 7px;font-size:11px;color:#000;background:transparent!important;word-wrap:break-word;width:auto}
 .modern-table th,.summary-table th{background:#e8e8e8!important}
 .modern-table tbody tr{background:#fff!important}
 .modern-table tbody tr td:first-child{box-shadow:none!important}
 .edit-amount{color:#000;font-weight:700}
 .total-row td{border-top:2px solid #000;background:#f4f4f4!important;color:#000;font-size:12px}
-.modern-table td,.modern-table th{width:auto}
+.total-row.saldo td{font-size:11px;border-top:1px solid #000}
 }
 </style>
 </head>
@@ -103,9 +105,16 @@ tr{break-inside:avoid}
 </div>
 <datalist id="lista-beneficiari"></datalist>
 <div class="card filter-card no-print">
-<label class="filter-label">👁️ Visualizza:</label>
 <select id="filtro-banca"><option value="TUTTE">TUTTE LE BANCHE INSIEME</option></select>
+<select id="fstato">
+<option value="tutti">Tutti gli stati</option>
+<option value="np">Solo da pagare</option>
+<option value="scad">Solo scaduti</option>
+<option value="prox">In scadenza (7 gg)</option>
+<option value="pag">Solo pagati</option>
+</select>
 <input type="search" id="cerca" placeholder="🔎 Cerca beneficiario, numero, causale">
+<input type="text" id="saldo" inputmode="decimal" placeholder="💶 Saldo conto (es. 50.000,00)">
 </div>
 <div class="card no-print">
 <form id="checkForm">
@@ -123,6 +132,7 @@ tr{break-inside:avoid}
 </form>
 <button class="btn-secondary" onclick="aggiungiBanca()">+ Aggiungi Nuova Banca in Rubrica</button>
 </div>
+<div class="ph" id="ph"></div>
 <div class="stats no-print" id="stats"></div>
 <div id="riepilogo" class="summary-section"></div>
 <div id="da-pagare"></div>
@@ -194,9 +204,10 @@ const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){re
 const cents=n=>Math.round((+n||0)*100);
 const fmt=c=>{const a=Math.abs(c);return(c<0?'-':'')+Math.floor(a/100).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+String(a%100).padStart(2,'0')+' €'};
 const fd=s=>s?s.split('-').reverse().join('/'):'';
-const monthLabel=k=>{const[y,m]=k.split('-');return MESI[+m-1]+' '+y};
+const monthLabel=k=>{const[y,m]=k.split('-');return MESI[+m-1]?MESI[+m-1]+' '+y:'SENZA DATA'};
 const parseImp=v=>Math.round((parseFloat(String(v).replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''))||0)*100)/100;
 const isoDay=d=>{const p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
+const limiti=()=>{const t=new Date();t.setDate(t.getDate()+7);return[isoDay(new Date()),isoDay(t)]};
 
 let banks=load('assegni_banks',[B0,"Banca Popolare Pugliese"]);
 let checks=load('assegni_data',[]);
@@ -206,12 +217,14 @@ if(!Array.isArray(checks)||!checks.length){
 }
 checks.forEach(c=>{if(c.pagato===undefined)c.pagato=false});
 
-function salva(){localStorage.setItem('assegni_data',JSON.stringify(checks))}
+function salva(){
+  try{localStorage.setItem('assegni_data',JSON.stringify(checks))}
+  catch(e){alert('Attenzione: impossibile salvare i dati nel browser (memoria piena o bloccata). Fai subito un Backup.')}
+}
 function salvaERender(){salva();aggiornaBeneficiari();render()}
 
 function aggiornaBeneficiari(){
-  const dl=$('lista-beneficiari');
-  dl.innerHTML=[...new Set(checks.map(c=>(c.beneficiario||'').trim()))].filter(Boolean).sort().map(n=>`<option value="${esc(n)}">`).join('');
+  $('lista-beneficiari').innerHTML=[...new Set(checks.map(c=>(c.beneficiario||'').trim()))].filter(Boolean).sort().map(n=>`<option value="${esc(n)}">`).join('');
 }
 function aggiornaBanche(){
   const cur=$('filtro-banca').value||'TUTTE';
@@ -240,6 +253,7 @@ document.addEventListener('change',e=>{
   if(!tr||!t.dataset.f)return;
   const c=checks.find(x=>x.id===tr.dataset.id);if(!c)return;
   const f=t.dataset.f;
+  if(f==='data'&&!t.value){render();return}
   if(f==='importo')c.importo=parseImp(t.value);
   else if(f==='pagato')c.pagato=t.checked;
   else{
@@ -268,20 +282,16 @@ function riepilogo(dati){
     m[k]=m[k]||{e:0,p:0,r:0};y[a]=y[a]||{e:0,p:0,r:0};
     [m[k],y[a]].forEach(o=>{o.e+=v;c.pagato?o.p+=v:o.r+=v});
   });
-  const tab=(tit,obj,lab)=>`<h3>${tit}</h3><div class="table-wrapper"><table class="summary-table"><thead><tr><th>${tit.includes('Mens')?'Mese':'Anno'}</th><th>Totale Emesso</th><th class="col-pagato">Già Pagato</th><th class="col-residuo">DA PAGARE (Residuo)</th></tr></thead><tbody>${
+  const tab=(tit,col,obj,lab)=>`<h3>${tit}</h3><div class="table-wrapper"><table class="summary-table"><thead><tr><th>${col}</th><th>Totale Emesso</th><th class="col-pagato">Già Pagato</th><th class="col-residuo">DA PAGARE (Residuo)</th></tr></thead><tbody>${
     Object.keys(obj).sort().map(k=>`<tr><td>${lab(k)}</td><td>${fmt(obj[k].e)}</td><td class="col-pagato">${fmt(obj[k].p)}</td><td class="col-residuo">${fmt(obj[k].r)}</td></tr>`).join('')
   }</tbody></table></div>`;
-  $('riepilogo').innerHTML=dati.length?tab('Situazione Mensile',m,monthLabel)+tab('Situazione Annuale',y,k=>k):'<p>Nessun dato corrispondente al filtro.</p>';
-}
-
-function stato(c,oggi,tra7){
-  if(c.pagato)return'rp';
-  return c.data<oggi?'scad':c.data<=tra7?'prox':'';
+  $('riepilogo').innerHTML=dati.length?tab('Situazione Mensile','Mese',m,monthLabel)+tab('Situazione Annuale','Anno',y,k=>k):'<p>Nessun dato corrispondente al filtro.</p>';
 }
 
 function riga(c,oggi,tra7){
   const opts=banks.map(b=>`<option value="${esc(b)}"${c.banca===b?' selected':''}>${esc(b)}</option>`).join('');
-  return`<tr data-id="${esc(c.id)}" class="${stato(c,oggi,tra7)}">
+  const st=c.pagato?'rp':c.data<oggi?'scad':c.data<=tra7?'prox':'';
+  return`<tr data-id="${esc(c.id)}" class="${st}">
 <td class="col-data"><input type="date" class="ei di no-print" data-f="data" value="${esc(c.data)}"><b class="po">${fd(c.data)}</b></td>
 <td class="col-banca"><select class="ei no-print" data-f="banca">${opts}</select><span class="po">${esc(c.banca)}</span></td>
 <td class="col-num"><input type="text" class="ei no-print" data-f="numero" value="${esc(c.numero)}"><span class="po">${esc(c.numero)}</span></td>
@@ -292,36 +302,47 @@ function riga(c,oggi,tra7){
 </tr>`;
 }
 
-function gruppi(dati,cont,pagato){
+function gruppi(dati,cont,pagato,saldo){
   const g={};
   dati.forEach(c=>(g[c.data.slice(0,7)]=g[c.data.slice(0,7)]||[]).push(c));
-  const oggi=isoDay(new Date()),t=new Date();t.setDate(t.getDate()+7);const tra7=isoDay(t);
+  const[oggi,tra7]=limiti();
+  let run=pagato?null:saldo;
   cont.innerHTML=Object.keys(g).sort().map(k=>{
     const tot=g[k].reduce((s,c)=>s+cents(c.importo),0);
-    return`<div class="month-group"><div class="month-header${pagato?' header-pagati':''}">${monthLabel(k)}</div><div class="table-wrapper"><table class="modern-table"><thead><tr><th class="col-data">Data</th><th class="col-banca">Banca</th><th class="col-num">N° Assegno</th><th>Beneficiario</th><th>Causale</th><th class="th-imp">Importo</th><th class="col-azione no-print">Stato</th></tr></thead><tbody>${g[k].map(c=>riga(c,oggi,tra7)).join('')}</tbody><tfoot><tr class="total-row${pagato?' pg':''}"><td colspan="5">Totale ${pagato?'Pagato':'DA PAGARE'} ${monthLabel(k)}:</td><td>${fmt(tot)}</td><td class="no-print"></td></tr></tfoot></table></div></div>`;
+    let rigaSaldo='';
+    if(run!==null){run-=tot;rigaSaldo=`<tr class="total-row saldo${run<0?' neg':''}"><td colspan="5">${run<0?'⚠ ':''}Saldo previsto a fine mese:</td><td>${fmt(run)}</td><td class="no-print"></td></tr>`}
+    return`<div class="month-group"><div class="month-header${pagato?' header-pagati':''}">${monthLabel(k)}</div><div class="table-wrapper"><table class="modern-table"><thead><tr><th class="col-data">Data</th><th class="col-banca">Banca</th><th class="col-num">N° Assegno</th><th>Beneficiario</th><th>Causale</th><th class="th-imp">Importo</th><th class="col-azione no-print">Stato</th></tr></thead><tbody>${g[k].map(c=>riga(c,oggi,tra7)).join('')}</tbody><tfoot><tr class="total-row${pagato?' pg':''}"><td colspan="5">Totale ${pagato?'Pagato':'DA PAGARE'} ${monthLabel(k)}:</td><td>${fmt(tot)}</td><td class="no-print"></td></tr>${rigaSaldo}</tfoot></table></div></div>`;
   }).join('');
 }
 
 function filtrati(){
-  const fb=$('filtro-banca').value,q=$('cerca').value.trim().toLowerCase();
-  return checks.filter(c=>(fb==='TUTTE'||c.banca===fb)&&(!q||[c.beneficiario,c.numero,c.causale].join(' ').toLowerCase().includes(q)))
-    .sort((a,b)=>a.data.localeCompare(b.data));
+  const fb=$('filtro-banca').value,fs=$('fstato').value,q=$('cerca').value.trim().toLowerCase(),[oggi,tra7]=limiti();
+  return checks.filter(c=>
+    (fb==='TUTTE'||c.banca===fb)&&
+    (!q||[c.beneficiario,c.numero,c.causale].join(' ').toLowerCase().includes(q))&&
+    (fs==='tutti'||(fs==='pag'?c.pagato:!c.pagato&&(fs==='np'||(fs==='scad'?c.data<oggi:c.data>=oggi&&c.data<=tra7))))
+  ).sort((a,b)=>a.data.localeCompare(b.data)||String(a.numero).localeCompare(String(b.numero)));
 }
 
 function render(){
-  const dati=filtrati();
+  const dati=filtrati(),[oggi,tra7]=limiti();
   riepilogo(dati);
-  const oggi=isoDay(new Date()),t=new Date();t.setDate(t.getDate()+7);const tra7=isoDay(t);
-  const np=dati.filter(c=>!c.pagato);
+  const s=$('saldo').value.trim(),saldo=s===''?null:cents(parseImp(s));
+  const np=dati.filter(c=>!c.pagato),pag=dati.filter(c=>c.pagato);
   const sc=np.filter(c=>c.data<oggi),pr=np.filter(c=>c.data>=oggi&&c.data<=tra7);
-  const somma=a=>fmt(a.reduce((s,c)=>s+cents(c.importo),0));
-  $('stats').innerHTML=`<div class="stat red">Scaduti non pagati (${sc.length})<b>${somma(sc)}</b></div><div class="stat amber">In scadenza entro 7 giorni (${pr.length})<b>${somma(pr)}</b></div><div class="stat">Totale da pagare (${np.length})<b>${somma(np)}</b></div>`;
-  const pag=dati.filter(c=>c.pagato);
+  const somma=a=>a.reduce((x,c)=>x+cents(c.importo),0);
+  const lb=+localStorage.getItem('assegni_lastbackup')||0,gg=lb?Math.floor((Date.now()-lb)/864e5):null;
+  let h=`<div class="stat red">Scaduti non pagati (${sc.length})<b>${fmt(somma(sc))}</b></div><div class="stat amber">In scadenza entro 7 giorni (${pr.length})<b>${fmt(somma(pr))}</b></div><div class="stat">Totale da pagare (${np.length})<b>${fmt(somma(np))}</b></div>`;
+  if(saldo!==null){const r=saldo-somma(np);h+=`<div class="stat ${r<0?'red':'green'}">Saldo dopo tutti i pagamenti<b>${fmt(r)}</b></div>`}
+  h+=`<div class="stat ${gg===null||gg>7?'amber':''}">Ultimo backup<b>${gg===null?'mai eseguito':gg===0?'oggi':gg+' giorni fa'}</b></div>`;
+  $('stats').innerHTML=h;
+  const fs=$('fstato');
+  $('ph').textContent=`Scadenziario assegni — stampato il ${fd(oggi)} — ${$('filtro-banca').value==='TUTTE'?'Tutte le banche':$('filtro-banca').value}${fs.value!=='tutti'?' — '+fs.selectedOptions[0].text:''}${$('cerca').value.trim()?' — ricerca: "'+$('cerca').value.trim()+'"':''}`;
   if(!dati.length){$('da-pagare').innerHTML='<p style="text-align:center;padding:20px">Nessun assegno trovato per questa selezione.</p>';$('sezione-pagati').style.display='none';return}
-  if(np.length)gruppi(np,$('da-pagare'),false);
-  else $('da-pagare').innerHTML='<p style="text-align:center;color:#7f8c8d;padding:20px;font-weight:700">Tutti gli assegni del periodo sono stati pagati.</p>';
+  if(np.length)gruppi(np,$('da-pagare'),false,saldo);
+  else $('da-pagare').innerHTML='<p style="text-align:center;color:#7f8c8d;padding:20px;font-weight:700">Nessun assegno da pagare per questa selezione.</p>';
   $('sezione-pagati').style.display=pag.length?'block':'none';
-  if(pag.length)gruppi(pag,$('pagati'),true);
+  if(pag.length)gruppi(pag,$('pagati'),true,null);
 }
 
 function stampa(){
@@ -333,7 +354,10 @@ function scarica(nome,tipo,contenuto){
   a.href=URL.createObjectURL(new Blob([contenuto],{type:tipo}));
   a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-function esportaJSON(){scarica('backup-assegni-'+isoDay(new Date())+'.json','application/json',JSON.stringify({banks,checks},null,1))}
+function esportaJSON(){
+  scarica('backup-assegni-'+isoDay(new Date())+'.json','application/json',JSON.stringify({banks,checks},null,1));
+  localStorage.setItem('assegni_lastbackup',Date.now());render();
+}
 function esportaCSV(){
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   const righe=[['Data','Banca','Numero','Beneficiario','Causale','Importo','Pagato'].map(q).join(';')]
@@ -356,8 +380,15 @@ $('imp').addEventListener('change',e=>{
   };
   r.readAsText(f);
 });
+
+$('saldo').value=localStorage.getItem('assegni_saldo')||'';
+$('saldo').addEventListener('input',()=>{localStorage.setItem('assegni_saldo',$('saldo').value);render()});
 $('filtro-banca').addEventListener('change',render);
+$('fstato').addEventListener('change',render);
 $('cerca').addEventListener('input',render);
+window.addEventListener('storage',e=>{
+  if(e.key==='assegni_data'){checks=load('assegni_data',[]);aggiornaBeneficiari();render()}
+});
 
 aggiornaBanche();aggiornaBeneficiari();render();
 </script>
