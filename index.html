@@ -6,79 +6,77 @@
     <title>Scadenziario Assegni</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 15px; }
+        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        h2 { text-align: center; color: #2c3e50; margin: 10px 0 20px 0; }
+        h2 { text-align: center; color: #1a252f; margin: 10px 0 25px 0; font-size: 28px; }
         
-        .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 4px solid #3498db; }
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         
         /* Bottoni */
-        button { padding: 8px 12px; font-size: 14px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-primary { background-color: #3498db; color: white; border: none; height: 100%; }
-        .btn-secondary { background-color: #ecf0f1; color: #333; border: 1px solid #bdc3c7; width: 100%; margin-top: 10px; }
-        .btn-pdf { background-color: #e74c3c; color: white; border: none; }
-        .btn-print { background-color: #2c3e50; color: white; border: none; }
+        button { padding: 10px 15px; font-size: 14px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary { background-color: #3498db; color: white; height: 100%; box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3); }
+        .btn-secondary { background-color: #ecf0f1; color: #2c3e50; border: 1px solid #bdc3c7; width: 100%; margin-top: 15px; }
+        .btn-pdf { background-color: #e74c3c; color: white; box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3); }
+        .btn-print { background-color: #2c3e50; color: white; box-shadow: 0 2px 5px rgba(44, 62, 80, 0.3); }
 
         /* Form Input */
-        .form-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
-        .form-group { flex: 1; min-width: 130px; display: flex; flex-direction: column; }
-        label { font-size: 0.85em; font-weight: 600; margin-bottom: 4px; color: #555; }
-        input, select { padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        input:focus, select:focus { outline: none; border-color: #3498db; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+        .form-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; }
+        label { font-size: 0.85em; font-weight: 700; margin-bottom: 6px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { padding: 10px; font-size: 14px; border: 1px solid #dcdde1; border-radius: 6px; box-sizing: border-box; background-color: #f8f9fa; }
+        input:focus, select:focus { outline: none; border-color: #3498db; background-color: #fff; box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
 
         /* Tabelle Situazione Contabile */
-        .summary-section { margin-bottom: 30px; }
-        .summary-section h3 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-bottom: 15px; }
-        .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.95em; }
-        .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 10px; text-align: right; }
-        .summary-table th { background-color: #2c3e50; color: white; text-align: center; }
+        .summary-section { margin-bottom: 30px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .summary-section h3 { color: #2c3e50; margin-top: 0; margin-bottom: 15px; }
+        .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.95em; }
+        .summary-table th, .summary-table td { border: 1px solid #e1e8ed; padding: 12px; text-align: right; }
+        .summary-table th { background-color: #34495e; color: white; text-align: center; }
         .summary-table td:first-child { text-align: left; font-weight: bold; background-color: #f4f6f7; color: #2c3e50; }
         .summary-table .total-col { font-weight: bold; background-color: #e8f6f3; color: #1e8449; }
 
-        /* Scadenziario */
-        .table-responsive { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .month-group { min-width: 1050px; }
-        .month-header { background: #34495e; color: #fff; padding: 10px 15px; font-size: 1.1em; font-weight: bold; }
+        /* Scadenziario - Tabelle Moderne */
+        .month-group { background: #fff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 30px; overflow: hidden; }
+        .month-header { background: #2c3e50; color: #fff; padding: 12px 20px; font-size: 1.2em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         
-        .check-row { 
-            display: grid; 
-            grid-template-columns: 110px 220px 100px 1.5fr 1.5fr 120px 50px; 
-            gap: 10px; 
-            align-items: center; 
-            padding: 6px 10px; 
-            border-bottom: 1px solid #eee; 
-            font-size: 0.9em;
-        }
-        .check-row:hover { background-color: #f9fbfd; }
-        .check-header { background: #ecf0f1; font-weight: bold; font-size: 0.85em; color: #555; text-transform: uppercase; border-bottom: 2px solid #bdc3c7; padding: 10px; }
+        .modern-table { width: 100%; border-collapse: collapse; }
+        .modern-table th { background-color: #ecf0f1; color: #7f8c8d; font-weight: 700; font-size: 0.85em; text-transform: uppercase; padding: 12px 10px; border-bottom: 2px solid #bdc3c7; text-align: left; }
         
-        /* Campi Modificabili */
-        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: inherit; padding: 4px; border-radius: 4px; box-sizing: border-box; }
-        .edit-input:hover { border-color: #ccc; background: #fff; }
+        /* Linea visibile tra assegni e strisce alternate */
+        .modern-table td { padding: 8px 10px; border-bottom: 1px solid #dcdde1; vertical-align: middle; }
+        .modern-table tbody tr:nth-child(even) { background-color: #f9fbfd; }
+        .modern-table tbody tr:hover { background-color: #f1f8ff; }
+        
+        /* Campi Modificabili in Tabella */
+        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 0.95em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; }
+        .edit-input:hover { border-color: #bdc3c7; background: #fff; }
         .edit-input:focus { border-color: #3498db; background: #fff; outline: none; }
-        .edit-amount { text-align: right; font-weight: bold; color: #27ae60; }
-        .date-input { background: #e74c3c; color: white; font-weight: bold; text-align: center; }
         
-        .delete-btn { color: #fff; background-color: #e74c3c; padding: 4px 8px; font-size: 0.8em; border-radius: 4px; }
-        .total-row { padding: 12px 15px; background: #fdfefe; text-align: right; font-weight: bold; font-size: 1.15em; border-top: 2px solid #ddd; color: #2c3e50; }
+        .edit-amount { text-align: right; font-weight: 800; color: #27ae60; font-size: 1.05em; }
+        .date-input { background: #e74c3c; color: white; font-weight: bold; text-align: center; border-radius: 4px; padding: 4px; font-size: 0.9em; }
+        
+        .delete-btn { color: #fff; background-color: #e74c3c; padding: 6px 10px; font-size: 0.8em; border-radius: 4px; font-weight: bold; width: 100%; }
+        .total-row td { padding: 15px 20px; background: #fdfefe; text-align: right; font-weight: 800; font-size: 1.2em; color: #2c3e50; border-top: 2px solid #3498db; }
 
         /* Gestione Visibilità Stampa / PDF */
         .print-only { display: none; }
         
         .print-mode .no-print { display: none !important; }
         .print-mode .print-only { display: inline-block !important; }
-        .print-mode .check-row { grid-template-columns: 90px 220px 100px 1.5fr 1.5fr 110px !important; border-bottom: 1px solid #ccc; font-size: 12px; padding: 8px 5px; }
-        .print-mode .table-responsive { box-shadow: none; border: 1px solid #ddd; }
+        .print-mode .modern-table td { padding: 8px 6px; font-size: 12px; border-bottom: 1px solid #ccc; }
+        .print-mode .modern-table th { padding: 10px 6px; font-size: 11px; }
+        .print-mode .month-group { border: 1px solid #ccc; box-shadow: none; }
         
         @media print {
             body { background: #fff; padding: 0; }
             .no-print { display: none !important; }
             .print-only { display: inline-block !important; }
             .container { max-width: 100%; margin: 0; }
-            .card, .table-responsive, .summary-table { box-shadow: none; border: 1px solid #ccc; }
-            .month-group { page-break-inside: avoid; margin-bottom: 20px; }
-            .check-row { grid-template-columns: 90px 220px 100px 1.5fr 1.5fr 110px !important; border-bottom: 1px solid #000; font-size: 11px; padding: 6px; }
+            .card, .summary-section, .month-group { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 20px; }
+            .modern-table td { padding: 8px 6px; font-size: 11px; border-bottom: 1px solid #000; }
+            .modern-table th { padding: 10px 6px; font-size: 10px; background-color: #eee !important; color: #000; }
             .summary-table th, .summary-table td { padding: 6px; font-size: 11px; }
         }
     </style>
@@ -141,66 +139,74 @@
 </div>
 
 <script>
-    let banks = JSON.parse(localStorage.getItem('assegni_banks')) || ["Banca Popolare di Puglia e Basilicata", "Banca Popolare Pugliese"];
+    const bancaPredefinita = "Banca Popolare di Puglia e Basilicata";
+    let banks = JSON.parse(localStorage.getItem('assegni_banks')) || [bancaPredefinita, "Banca Popolare Pugliese"];
     let checks = JSON.parse(localStorage.getItem('assegni_data')) || [];
 
-    const bancaPredefinita = "Banca Popolare di Puglia e Basilicata";
+    // Script automatico: Forza tutti gli assegni attualmente in memoria sulla nuova banca
+    if (!localStorage.getItem('force_bppb_v4')) {
+        checks.forEach(c => {
+            c.banca = bancaPredefinita;
+        });
+        localStorage.setItem('force_bppb_v4', 'true');
+        localStorage.setItem('assegni_data', JSON.stringify(checks));
+    }
 
-    const assegniMassivi = [
-        { id: "m1", data: "2026-09-30", importo: 2360.37, banca: bancaPredefinita, numero: "72802", beneficiario: "ADESITAL SPA", causale: "FT. N. 3613 DEL 12/06/25+4078+1897" },
-        { id: "m2", data: "2026-09-30", importo: 4740.41, banca: bancaPredefinita, numero: "72921", beneficiario: "ITALCER SPA", causale: "S/ORDINE N.6101+6018 DEL 02/03/26" },
-        { id: "m3", data: "2026-09-30", importo: 4000.00, banca: bancaPredefinita, numero: "73510", beneficiario: "ERREDI SRL", causale: "S/FT. N. 170 DEL 31/03/26" },
-        { id: "m4", data: "2026-09-30", importo: 3500.00, banca: bancaPredefinita, numero: "73997", beneficiario: "EKORU SRL", causale: "S/FT. N. 854 DEL 15/04/26" },
-        { id: "m5", data: "2026-09-30", importo: 3555.08, banca: bancaPredefinita, numero: "74201", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260195 DEL 30/04/26" },
-        { id: "m6", data: "2026-09-30", importo: 1961.15, banca: bancaPredefinita, numero: "74921", beneficiario: "GSG CERAMIC DESIGN SRL", causale: "FT.N.549 DEL 09/03/26+FT.739" },
-        { id: "m7", data: "2026-09-30", importo: 2476.88, banca: bancaPredefinita, numero: "74922", beneficiario: "AD TILES SRL", causale: "FT.N. 159 DEL 24/03/26" },
-        { id: "m8", data: "2026-10-02", importo: 2000.00, banca: bancaPredefinita, numero: "74924", beneficiario: "GRUPPO GEROMIN SRL", causale: "FT. N. 559 DEL 26/01/26+N.828+2648" },
-        { id: "m9", data: "2026-10-02", importo: 5000.00, banca: bancaPredefinita, numero: "75136", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
-        { id: "m10", data: "2026-10-07", importo: 2848.01, banca: bancaPredefinita, numero: "74734", beneficiario: "IGIEMME SRL", causale: "FT.N.1381 DEL20/05/26+1510 - NC 72" },
-        { id: "m11", data: "2026-10-10", importo: 2853.31, banca: bancaPredefinita, numero: "74207", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.20863 DEL 14/04/26+FT.26196 -N.C." },
-        { id: "m12", data: "2026-10-10", importo: 1579.46, banca: bancaPredefinita, numero: "75465", beneficiario: "DIANFLEX SRL", causale: "FT. N. 31568+23822" },
-        { id: "m13", data: "2026-10-15", importo: 2001.81, banca: bancaPredefinita, numero: "74738", beneficiario: "CVR SPA", causale: "S/FT.N.3345 DEL 31/05/26" },
-        { id: "m14", data: "2026-10-16", importo: 3063.05, banca: bancaPredefinita, numero: "74927", beneficiario: "F.E.A.T. SRL", causale: "FT. N. 2001 DEL 31/05/26" },
-        { id: "m15", data: "2026-10-16", importo: 2532.43, banca: bancaPredefinita, numero: "75469", beneficiario: "IDROLINEA ZUPO SRL", causale: "FT. N. 50+201+273+358+426-NC.27/A" },
-        { id: "m16", data: "2026-10-16", importo: 1150.27, banca: bancaPredefinita, numero: "7619", beneficiario: "TSC EDILIZIA SRL", causale: "ACC.FT.N. 367 DEL 30/04/26 (R.B. 10/08)" },
-        { id: "m17", data: "2026-10-20", importo: 5644.94, banca: bancaPredefinita, numero: "74209", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260241 DEL 25/05/26" },
-        { id: "m18", data: "2026-10-20", importo: 3486.63, banca: bancaPredefinita, numero: "75134", beneficiario: "CVR SPA", causale: "S/FT.N. 4127 DEL 30/06/26" },
-        { id: "m19", data: "2026-10-21", importo: 3937.68, banca: bancaPredefinita, numero: "74511", beneficiario: "EKORU SRL", causale: "S/FT. N. 1144 DEL 15/05/26" },
-        { id: "m20", data: "2026-10-21", importo: 4369.39, banca: bancaPredefinita, numero: "74512", beneficiario: "PROGETTOMATERIA SRL", causale: "C/FT. N. 299 DEL 05/06/26" },
-        { id: "m21", data: "2026-10-26", importo: 2794.04, banca: bancaPredefinita, numero: "75137", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
-        { id: "m22", data: "2026-10-27", importo: 1286.28, banca: bancaPredefinita, numero: "74739", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.28617 DEL 18/05/26+3001+31290+3314" },
-        { id: "m23", data: "2026-10-31", importo: 6000.00, banca: bancaPredefinita, numero: "74513", beneficiario: "PROGETTOMATERIA SRL", causale: "S/FT.N.299+FT.N.249 DEL 28/05/26" },
-        { id: "m24", data: "2026-10-31", importo: 3266.50, banca: bancaPredefinita, numero: "74205", beneficiario: "ERREDI SRL", causale: "FT. N. 234 DEL 28/04/26" },
-        { id: "m25", data: "2026-10-31", importo: 2280.86, banca: bancaPredefinita, numero: "74731", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260313 DEL 16/06/26" },
-        { id: "m26", data: "2026-10-31", importo: 3366.96, banca: bancaPredefinita, numero: "74925", beneficiario: "GRUPPO GEROMIN SRL", causale: "FT.N.2648 DEL 23/03/26+3291" },
-        { id: "m27", data: "2026-10-31", importo: 3185.02, banca: bancaPredefinita, numero: "74926", beneficiario: "LATERFIAMMA SRL", causale: "FT. N. 387 DEL 31/03/26" },
-        { id: "m28", data: "2026-10-31", importo: 1516.87, banca: bancaPredefinita, numero: "75463", beneficiario: "FORTE SRL", causale: "FT. N.  1795 DEL 30/04/26+SPESE" },
-        { id: "m29", data: "2026-10-31", importo: 2829.03, banca: bancaPredefinita, numero: "75464", beneficiario: "EKORU SRL", causale: "FT. N. 1402 DEL 15/06/26" },
-        { id: "m30", data: "2026-11-05", importo: 2561.70, banca: bancaPredefinita, numero: "75467", beneficiario: "FIMA CARLO FRATTINI SPA", causale: "FT. N. 5308+8226+11308+12214" },
-        { id: "m31", data: "2026-11-05", importo: 1537.63, banca: bancaPredefinita, numero: "7833", beneficiario: "FORTE SRL", causale: "FT.N.2382 DEL 31/05/26" },
-        { id: "m32", data: "2026-11-09", importo: 1975.56, banca: bancaPredefinita, numero: "74740", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.27913-NC. 27221 DEL 06/05/26" },
-        { id: "m33", data: "2026-11-10", importo: 3637.65, banca: bancaPredefinita, numero: "75138", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
-        { id: "m34", data: "2026-11-10", importo: 6000.00, banca: bancaPredefinita, numero: "7831", beneficiario: "CVR SPA", causale: "FT. N. 4876 DEL 31/07/26" },
-        { id: "m35", data: "2026-11-10", importo: 2211.45, banca: bancaPredefinita, numero: "7620", beneficiario: "DIANFLEX SRL", causale: "R.B. AL 10/08/26+10/09/26+ACC. SU FT. SUCCESSIV" },
-        { id: "m36", data: "2026-11-12", importo: 1961.15, banca: bancaPredefinita, numero: "75468", beneficiario: "GSG CERAMIC DESIGN SRL", causale: "FT.N. 549+739" },
-        { id: "m37", data: "2026-11-15", importo: 1239.36, banca: bancaPredefinita, numero: "75466", beneficiario: "NAICI ITALIA SRL", causale: "FT. N. 4875 DEL 21/07/26" },
-        { id: "m38", data: "2026-11-16", importo: 883.37, banca: bancaPredefinita, numero: "728361", beneficiario: "HIDROS POINT SRL", causale: "FT. N. 13394 DEL 21/07/26" },
-        { id: "m39", data: "2026-11-20", importo: 1432.59, banca: bancaPredefinita, numero: "74733", beneficiario: "NAICI ITALIA SRL", causale: "FT. N. 3870  DEL 16/06/26" },
-        { id: "m40", data: "2026-11-20", importo: 1759.15, banca: bancaPredefinita, numero: "74735", beneficiario: "CARDINALE GROUP SRL", causale: "FT.N.22698 DEL 14/05/15+24567" },
-        { id: "m41", data: "2026-11-20", importo: 7020.22, banca: bancaPredefinita, numero: "74928", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260319 DEL 24/06/26" },
-        { id: "m42", data: "2026-11-27", importo: 3739.35, banca: bancaPredefinita, numero: "75139", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
-        { id: "m43", data: "2026-11-30", importo: 2729.61, banca: bancaPredefinita, numero: "75470", beneficiario: "THE ITALIAN DECKING COMPANY SPA", causale: "FT. N. 8958 DEL 20/08/26" },
-        { id: "m44", data: "2026-11-30", importo: 2500.00, banca: bancaPredefinita, numero: "727837", beneficiario: "ICOBIT ITALIA SRL", causale: "FT. N. 3501 DEL 06/07/26" },
-        { id: "m45", data: "2026-12-05", importo: 2000.00, banca: bancaPredefinita, numero: "7834", beneficiario: "FORTE SRL", causale: "FT.N. 2382 DEL 31/05/26" },
-        { id: "m46", data: "2026-12-10", importo: 3285.38, banca: bancaPredefinita, numero: "75462", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.35649+36612+38296+40534" },
-        { id: "m47", data: "2026-12-11", importo: 3518.00, banca: bancaPredefinita, numero: "75140", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
-        { id: "m48", data: "2026-12-11", importo: 6561.66, banca: bancaPredefinita, numero: "7832", beneficiario: "CVR SPA", causale: "S/FT. N. 4876 DEL 31/07/26" },
-        { id: "m49", data: "2026-12-14", importo: 2000.00, banca: bancaPredefinita, numero: "74516", beneficiario: "HERBERIA S.P.A.", causale: "FT.N. 7154 +7190 DEL 30/06/26" },
-        { id: "m50", data: "2026-12-15", importo: 2443.21, banca: bancaPredefinita, numero: "75461", beneficiario: "IGIEMME SRL", causale: "FTN, 2084 DEL 20/07/26" },
-        { id: "m51", data: "2026-12-18", importo: 3019.59, banca: bancaPredefinita, numero: "7614", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.43102 DEL 13/07/26+43051+43725" }
-    ];
-
+    // Assicura che i 51 assegni iniziali siano caricati se la memoria è vuota
     if (checks.length === 0) {
+        const assegniMassivi = [
+            { id: "m1", data: "2026-09-30", importo: 2360.37, banca: bancaPredefinita, numero: "72802", beneficiario: "ADESITAL SPA", causale: "FT. N. 3613 DEL 12/06/25+4078+1897" },
+            { id: "m2", data: "2026-09-30", importo: 4740.41, banca: bancaPredefinita, numero: "72921", beneficiario: "ITALCER SPA", causale: "S/ORDINE N.6101+6018 DEL 02/03/26" },
+            { id: "m3", data: "2026-09-30", importo: 4000.00, banca: bancaPredefinita, numero: "73510", beneficiario: "ERREDI SRL", causale: "S/FT. N. 170 DEL 31/03/26" },
+            { id: "m4", data: "2026-09-30", importo: 3500.00, banca: bancaPredefinita, numero: "73997", beneficiario: "EKORU SRL", causale: "S/FT. N. 854 DEL 15/04/26" },
+            { id: "m5", data: "2026-09-30", importo: 3555.08, banca: bancaPredefinita, numero: "74201", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260195 DEL 30/04/26" },
+            { id: "m6", data: "2026-09-30", importo: 1961.15, banca: bancaPredefinita, numero: "74921", beneficiario: "GSG CERAMIC DESIGN SRL", causale: "FT.N.549 DEL 09/03/26+FT.739" },
+            { id: "m7", data: "2026-09-30", importo: 2476.88, banca: bancaPredefinita, numero: "74922", beneficiario: "AD TILES SRL", causale: "FT.N. 159 DEL 24/03/26" },
+            { id: "m8", data: "2026-10-02", importo: 2000.00, banca: bancaPredefinita, numero: "74924", beneficiario: "GRUPPO GEROMIN SRL", causale: "FT. N. 559 DEL 26/01/26+N.828+2648" },
+            { id: "m9", data: "2026-10-02", importo: 5000.00, banca: bancaPredefinita, numero: "75136", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
+            { id: "m10", data: "2026-10-07", importo: 2848.01, banca: bancaPredefinita, numero: "74734", beneficiario: "IGIEMME SRL", causale: "FT.N.1381 DEL20/05/26+1510 - NC 72" },
+            { id: "m11", data: "2026-10-10", importo: 2853.31, banca: bancaPredefinita, numero: "74207", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.20863 DEL 14/04/26+FT.26196 -N.C." },
+            { id: "m12", data: "2026-10-10", importo: 1579.46, banca: bancaPredefinita, numero: "75465", beneficiario: "DIANFLEX SRL", causale: "FT. N. 31568+23822" },
+            { id: "m13", data: "2026-10-15", importo: 2001.81, banca: bancaPredefinita, numero: "74738", beneficiario: "CVR SPA", causale: "S/FT.N.3345 DEL 31/05/26" },
+            { id: "m14", data: "2026-10-16", importo: 3063.05, banca: bancaPredefinita, numero: "74927", beneficiario: "F.E.A.T. SRL", causale: "FT. N. 2001 DEL 31/05/26" },
+            { id: "m15", data: "2026-10-16", importo: 2532.43, banca: bancaPredefinita, numero: "75469", beneficiario: "IDROLINEA ZUPO SRL", causale: "FT. N. 50+201+273+358+426-NC.27/A" },
+            { id: "m16", data: "2026-10-16", importo: 1150.27, banca: bancaPredefinita, numero: "7619", beneficiario: "TSC EDILIZIA SRL", causale: "ACC.FT.N. 367 DEL 30/04/26 (R.B. 10/08)" },
+            { id: "m17", data: "2026-10-20", importo: 5644.94, banca: bancaPredefinita, numero: "74209", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260241 DEL 25/05/26" },
+            { id: "m18", data: "2026-10-20", importo: 3486.63, banca: bancaPredefinita, numero: "75134", beneficiario: "CVR SPA", causale: "S/FT.N. 4127 DEL 30/06/26" },
+            { id: "m19", data: "2026-10-21", importo: 3937.68, banca: bancaPredefinita, numero: "74511", beneficiario: "EKORU SRL", causale: "S/FT. N. 1144 DEL 15/05/26" },
+            { id: "m20", data: "2026-10-21", importo: 4369.39, banca: bancaPredefinita, numero: "74512", beneficiario: "PROGETTOMATERIA SRL", causale: "C/FT. N. 299 DEL 05/06/26" },
+            { id: "m21", data: "2026-10-26", importo: 2794.04, banca: bancaPredefinita, numero: "75137", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
+            { id: "m22", data: "2026-10-27", importo: 1286.28, banca: bancaPredefinita, numero: "74739", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.28617 DEL 18/05/26+3001+31290+3314" },
+            { id: "m23", data: "2026-10-31", importo: 6000.00, banca: bancaPredefinita, numero: "74513", beneficiario: "PROGETTOMATERIA SRL", causale: "S/FT.N.299+FT.N.249 DEL 28/05/26" },
+            { id: "m24", data: "2026-10-31", importo: 3266.50, banca: bancaPredefinita, numero: "74205", beneficiario: "ERREDI SRL", causale: "FT. N. 234 DEL 28/04/26" },
+            { id: "m25", data: "2026-10-31", importo: 2280.86, banca: bancaPredefinita, numero: "74731", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260313 DEL 16/06/26" },
+            { id: "m26", data: "2026-10-31", importo: 3366.96, banca: bancaPredefinita, numero: "74925", beneficiario: "GRUPPO GEROMIN SRL", causale: "FT.N.2648 DEL 23/03/26+3291" },
+            { id: "m27", data: "2026-10-31", importo: 3185.02, banca: bancaPredefinita, numero: "74926", beneficiario: "LATERFIAMMA SRL", causale: "FT. N. 387 DEL 31/03/26" },
+            { id: "m28", data: "2026-10-31", importo: 1516.87, banca: bancaPredefinita, numero: "75463", beneficiario: "FORTE SRL", causale: "FT. N.  1795 DEL 30/04/26+SPESE" },
+            { id: "m29", data: "2026-10-31", importo: 2829.03, banca: bancaPredefinita, numero: "75464", beneficiario: "EKORU SRL", causale: "FT. N. 1402 DEL 15/06/26" },
+            { id: "m30", data: "2026-11-05", importo: 2561.70, banca: bancaPredefinita, numero: "75467", beneficiario: "FIMA CARLO FRATTINI SPA", causale: "FT. N. 5308+8226+11308+12214" },
+            { id: "m31", data: "2026-11-05", importo: 1537.63, banca: bancaPredefinita, numero: "7833", beneficiario: "FORTE SRL", causale: "FT.N.2382 DEL 31/05/26" },
+            { id: "m32", data: "2026-11-09", importo: 1975.56, banca: bancaPredefinita, numero: "74740", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.27913-NC. 27221 DEL 06/05/26" },
+            { id: "m33", data: "2026-11-10", importo: 3637.65, banca: bancaPredefinita, numero: "75138", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
+            { id: "m34", data: "2026-11-10", importo: 6000.00, banca: bancaPredefinita, numero: "7831", beneficiario: "CVR SPA", causale: "FT. N. 4876 DEL 31/07/26" },
+            { id: "m35", data: "2026-11-10", importo: 2211.45, banca: bancaPredefinita, numero: "7620", beneficiario: "DIANFLEX SRL", causale: "R.B. AL 10/08/26+10/09/26+ACC. SU FT. SUCCESSIV" },
+            { id: "m36", data: "2026-11-12", importo: 1961.15, banca: bancaPredefinita, numero: "75468", beneficiario: "GSG CERAMIC DESIGN SRL", causale: "FT.N. 549+739" },
+            { id: "m37", data: "2026-11-15", importo: 1239.36, banca: bancaPredefinita, numero: "75466", beneficiario: "NAICI ITALIA SRL", causale: "FT. N. 4875 DEL 21/07/26" },
+            { id: "m38", data: "2026-11-16", importo: 883.37, banca: bancaPredefinita, numero: "728361", beneficiario: "HIDROS POINT SRL", causale: "FT. N. 13394 DEL 21/07/26" },
+            { id: "m39", data: "2026-11-20", importo: 1432.59, banca: bancaPredefinita, numero: "74733", beneficiario: "NAICI ITALIA SRL", causale: "FT. N. 3870  DEL 16/06/26" },
+            { id: "m40", data: "2026-11-20", importo: 1759.15, banca: bancaPredefinita, numero: "74735", beneficiario: "CARDINALE GROUP SRL", causale: "FT.N.22698 DEL 14/05/15+24567" },
+            { id: "m41", data: "2026-11-20", importo: 7020.22, banca: bancaPredefinita, numero: "74928", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260319 DEL 24/06/26" },
+            { id: "m42", data: "2026-11-27", importo: 3739.35, banca: bancaPredefinita, numero: "75139", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
+            { id: "m43", data: "2026-11-30", importo: 2729.61, banca: bancaPredefinita, numero: "75470", beneficiario: "THE ITALIAN DECKING COMPANY SPA", causale: "FT. N. 8958 DEL 20/08/26" },
+            { id: "m44", data: "2026-11-30", importo: 2500.00, banca: bancaPredefinita, numero: "727837", beneficiario: "ICOBIT ITALIA SRL", causale: "FT. N. 3501 DEL 06/07/26" },
+            { id: "m45", data: "2026-12-05", importo: 2000.00, banca: bancaPredefinita, numero: "7834", beneficiario: "FORTE SRL", causale: "FT.N. 2382 DEL 31/05/26" },
+            { id: "m46", data: "2026-12-10", importo: 3285.38, banca: bancaPredefinita, numero: "75462", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.35649+36612+38296+40534" },
+            { id: "m47", data: "2026-12-11", importo: 3518.00, banca: bancaPredefinita, numero: "75140", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO" },
+            { id: "m48", data: "2026-12-11", importo: 6561.66, banca: bancaPredefinita, numero: "7832", beneficiario: "CVR SPA", causale: "S/FT. N. 4876 DEL 31/07/26" },
+            { id: "m49", data: "2026-12-14", importo: 2000.00, banca: bancaPredefinita, numero: "74516", beneficiario: "HERBERIA S.P.A.", causale: "FT.N. 7154 +7190 DEL 30/06/26" },
+            { id: "m50", data: "2026-12-15", importo: 2443.21, banca: bancaPredefinita, numero: "75461", beneficiario: "IGIEMME SRL", causale: "FTN, 2084 DEL 20/07/26" },
+            { id: "m51", data: "2026-12-18", importo: 3019.59, banca: bancaPredefinita, numero: "7614", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.43102 DEL 13/07/26+43051+43725" }
+        ];
         checks = [...assegniMassivi];
         localStorage.setItem('assegni_data', JSON.stringify(checks));
     }
@@ -290,7 +296,6 @@
         renderScadenziario();
     }
 
-    // --- NUOVA LOGICA BUSINESS INTELLIGENCE (RIEPILOGHI) ---
     function calcolaRiepiloghi() {
         const container = document.getElementById('riepilogo-contabile');
         if (checks.length === 0) {
@@ -308,15 +313,12 @@
             const year = date.getFullYear();
             const monthStr = getMonthYearStr(c.data);
             
-            // Inizializza Mese
             if (!totalsByMonth[monthStr]) totalsByMonth[monthStr] = { total: 0, dateObj: date, banks: {} };
             if (!totalsByMonth[monthStr].banks[c.banca]) totalsByMonth[monthStr].banks[c.banca] = 0;
             
-            // Inizializza Anno
             if (!totalsByYear[year]) totalsByYear[year] = { total: 0, banks: {} };
             if (!totalsByYear[year].banks[c.banca]) totalsByYear[year].banks[c.banca] = 0;
 
-            // Somma
             totalsByMonth[monthStr].banks[c.banca] += c.importo;
             totalsByMonth[monthStr].total += c.importo;
             totalsByYear[year].banks[c.banca] += c.importo;
@@ -326,14 +328,12 @@
         const bankList = Array.from(activeBanks).sort();
         let headersHtml = bankList.map(b => `<th>${b}</th>`).join('');
 
-        // Genera Tabella Mensile
         let htmlMensile = `
             <h3>Situazione Mensile</h3>
             <table class="summary-table">
                 <thead><tr><th>Mese</th>${headersHtml}<th class="total-col">Totale Mese</th></tr></thead>
                 <tbody>`;
         
-        // Ordina i mesi cronologicamente
         const sortedMonths = Object.keys(totalsByMonth).sort((a, b) => totalsByMonth[a].dateObj - totalsByMonth[b].dateObj);
         
         sortedMonths.forEach(month => {
@@ -346,7 +346,6 @@
         });
         htmlMensile += `</tbody></table>`;
 
-        // Genera Tabella Annuale
         let htmlAnnuale = `
             <h3>Situazione Annuale</h3>
             <table class="summary-table">
@@ -366,18 +365,17 @@
         container.innerHTML = htmlMensile + htmlAnnuale;
     }
 
-    // --- NUOVA LOGICA PDF ---
     function scaricaPDF() {
         const container = document.getElementById('main-container');
         container.classList.add('print-mode');
         
-        // windowWidth forza il sistema grafico a comportarsi come uno schermo largo (risolve testi tagliati e ritorni a capo)
         const opt = {
-            margin:       7,
+            margin:       [10, 10, 10, 10],
             filename:     'contabilita-assegni.pdf',
-            image:        { type: 'jpeg', quality: 1 },
-            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1200 }, 
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
         };
         
         html2pdf().set(opt).from(container).save().then(() => {
@@ -386,7 +384,7 @@
     }
 
     function renderScadenziario() {
-        calcolaRiepiloghi(); // Aggiorna prima la contabilità
+        calcolaRiepiloghi(); 
 
         const container = document.getElementById('scadenziario');
         container.innerHTML = '';
@@ -404,12 +402,22 @@
 
         for (const [month, items] of Object.entries(grouped)) {
             let html = `
-            <div class="table-responsive">
-                <div class="month-group">
-                    <div class="month-header">${month}</div>
-                    <div class="check-row check-header">
-                        <div>Data</div><div>Banca</div><div>N° Assegno</div><div>Beneficiario</div><div>Causale</div><div style="text-align: right;">Importo</div><div class="no-print">Azione</div>
-                    </div>`;
+            <div class="month-group">
+                <div class="month-header">${month}</div>
+                <div style="overflow-x: auto;">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 110px;">Data</th>
+                                <th style="width: 220px;">Banca</th>
+                                <th style="width: 100px;">N° Assegno</th>
+                                <th>Beneficiario</th>
+                                <th>Causale</th>
+                                <th style="width: 130px; text-align: right;">Importo</th>
+                                <th style="width: 60px;" class="no-print">Azione</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
             let totaleMese = 0;
             
@@ -420,39 +428,48 @@
                 banks.forEach(b => { rowSelectHtml += `<option value="${b}" ${c.banca === b ? 'selected' : ''}>${b}</option>`; });
                 rowSelectHtml += `</select>`;
 
-                // La classe print-only mostra il testo pulito per Stampa e PDF, nascondendo l'input interattivo
                 html += `
-                    <div class="check-row">
-                        <div>
-                            <input type="date" class="edit-input date-input no-print" value="${c.data}" onchange="aggiornaCampo('${c.id}', 'data', this.value)">
-                            <span class="print-only" style="font-weight:bold;">${formatDate(c.data)}</span>
-                        </div>
-                        <div>
-                            ${rowSelectHtml}
-                            <span class="print-only">${c.banca}</span>
-                        </div>
-                        <div>
-                            <input type="text" class="edit-input no-print" value="${c.numero}" onchange="aggiornaCampo('${c.id}', 'numero', this.value)">
-                            <span class="print-only">${c.numero}</span>
-                        </div>
-                        <div>
-                            <input type="text" class="edit-input no-print" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
-                            <span class="print-only">${c.beneficiario}</span>
-                        </div>
-                        <div>
-                            <input type="text" class="edit-input no-print" value="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
-                            <span class="print-only">${c.causale || ''}</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <input type="text" class="edit-input edit-amount no-print" value="${formatCurrency(c.importo)}" onchange="aggiornaCampo('${c.id}', 'importo', this.value)">
-                            <span class="print-only edit-amount">${formatCurrency(c.importo)}</span>
-                        </div>
-                        <div class="no-print"><button class="delete-btn" onclick="eliminaAssegno('${c.id}')">Elimina</button></div>
-                    </div>`;
+                            <tr>
+                                <td>
+                                    <input type="date" class="edit-input date-input no-print" value="${c.data}" onchange="aggiornaCampo('${c.id}', 'data', this.value)">
+                                    <span class="print-only" style="font-weight:bold;">${formatDate(c.data)}</span>
+                                </td>
+                                <td>
+                                    ${rowSelectHtml}
+                                    <span class="print-only">${c.banca}</span>
+                                </td>
+                                <td>
+                                    <input type="text" class="edit-input no-print" value="${c.numero}" onchange="aggiornaCampo('${c.id}', 'numero', this.value)">
+                                    <span class="print-only">${c.numero}</span>
+                                </td>
+                                <td>
+                                    <input type="text" class="edit-input no-print" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
+                                    <span class="print-only">${c.beneficiario}</span>
+                                </td>
+                                <td>
+                                    <input type="text" class="edit-input no-print" value="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
+                                    <span class="print-only">${c.causale || ''}</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <input type="text" class="edit-input edit-amount no-print" value="${formatCurrency(c.importo)}" onchange="aggiornaCampo('${c.id}', 'importo', this.value)">
+                                    <span class="print-only edit-amount">${formatCurrency(c.importo)}</span>
+                                </td>
+                                <td class="no-print">
+                                    <button class="delete-btn" onclick="eliminaAssegno('${c.id}')">X</button>
+                                </td>
+                            </tr>`;
             });
 
             html += `
-                    <div class="total-row">Totale ${month}: ${formatCurrency(totaleMese)}</div>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="5">Totale ${month}:</td>
+                                <td>${formatCurrency(totaleMese)}</td>
+                                <td class="no-print"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>`;
             
