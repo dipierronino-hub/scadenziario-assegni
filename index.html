@@ -45,7 +45,7 @@
         .col-pagato { background-color: #e8f8f5; color: #27ae60; }
         .col-residuo { background-color: #fdebd0; color: #d35400; font-weight: 900; font-size: 1.05em; }
 
-        /* Scadenziario - Strisce ad alto contrasto */
+        /* Scadenziario */
         .month-group { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; overflow: hidden; }
         .month-header { background: #34495e; color: #fff; padding: 15px 20px; font-size: 1.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
         .header-pagati { background: #27ae60 !important; }
@@ -56,7 +56,7 @@
         /* Contrasto Righe (Zebra) */
         .modern-table td { padding: 10px; border-bottom: 2px solid #aeb6bf; vertical-align: middle; }
         .modern-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-        .modern-table tbody tr:nth-child(even) { background-color: #e3f0f9; } /* Azzurrino per stacco forte */
+        .modern-table tbody tr:nth-child(even) { background-color: #e3f0f9; }
         .modern-table tbody tr:hover { background-color: #cce5ff; }
         
         /* Stile Righe Pagate */
@@ -71,6 +71,10 @@
         .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 1em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; font-weight: 600; }
         .edit-input:hover { border-color: #95a5a6; background: #fff; }
         .edit-input:focus { border-color: #3498db; background: #fff; outline: none; }
+        
+        /* Rimpicciolimento Causale */
+        .causale-text { font-size: 0.82em !important; line-height: 1.2; font-weight: 500; }
+        
         .edit-amount { text-align: right; font-weight: 900; color: #e74c3c; font-size: 1.1em; }
         .date-input { background: #e74c3c; color: white; font-weight: bold; text-align: center; border-radius: 4px; padding: 6px; font-size: 0.95em; }
         
@@ -112,6 +116,9 @@
         </div>
     </div>
 
+    <!-- Datalist per la memoria dei Beneficiari -->
+    <datalist id="lista-beneficiari"></datalist>
+
     <!-- Filtro Banche -->
     <div class="card filter-card no-print">
         <label class="filter-label">👁️ Visualizza:</label>
@@ -145,7 +152,8 @@
                 </div>
                 <div class="form-group" style="flex: 2;">
                     <label>Beneficiario</label>
-                    <input type="text" id="beneficiario" placeholder="A favore di..." required>
+                    <!-- Collegato alla datalist -->
+                    <input type="text" id="beneficiario" list="lista-beneficiari" placeholder="Inizia a digitare o clicca due volte..." autocomplete="off" required>
                 </div>
                 <div class="form-group" style="flex: 2;">
                     <label>Causale</label>
@@ -189,7 +197,6 @@
     });
 
     if (checks.length === 0) {
-        // Dati di base omessi qui per brevità verbale, ma presenti in esecuzione
         const assegniMassivi = [
             { id: "m1", data: "2026-09-30", importo: 2360.37, banca: bancaPredefinita, numero: "72802", beneficiario: "ADESITAL SPA", causale: "FT. N. 3613 DEL 12/06/25+4078+1897", pagato: false },
             { id: "m2", data: "2026-09-30", importo: 4740.41, banca: bancaPredefinita, numero: "72921", beneficiario: "ITALCER SPA", causale: "S/ORDINE N.6101+6018 DEL 02/03/26", pagato: false },
@@ -267,7 +274,22 @@
 
     function init() {
         aggiornaSelectBanche();
+        aggiornaListaBeneficiari();
         renderScadenziario();
+    }
+
+    // Estrae tutti i beneficiari univoci e riempie la Datalist
+    function aggiornaListaBeneficiari() {
+        const datalist = document.getElementById('lista-beneficiari');
+        if(!datalist) return;
+        datalist.innerHTML = '';
+        
+        const nomiUnivoci = [...new Set(checks.map(c => c.beneficiario.trim()))].filter(n => n !== '');
+        nomiUnivoci.sort().forEach(nome => {
+            let option = document.createElement('option');
+            option.value = nome;
+            datalist.appendChild(option);
+        });
     }
 
     function aggiornaSelectBanche() {
@@ -346,10 +368,10 @@
 
     function saveAndRender() {
         localStorage.setItem('assegni_data', JSON.stringify(checks));
+        aggiornaListaBeneficiari(); // Aggiorna i nomi se ne hai inserito uno nuovo
         renderScadenziario();
     }
 
-    // Calcolo Riepiloghi separando Pagato e Da Pagare in base al filtro
     function calcolaRiepiloghi(datiFiltrati) {
         const container = document.getElementById('riepilogo-contabile');
         if (datiFiltrati.length === 0) {
@@ -380,7 +402,6 @@
             }
         });
 
-        // Tabella Mensile
         let htmlMensile = `
             <h3>Situazione Mensile</h3>
             <table class="summary-table">
@@ -406,7 +427,6 @@
         });
         htmlMensile += `</tbody></table>`;
 
-        // Tabella Annuale
         let htmlAnnuale = `
             <h3>Situazione Annuale</h3>
             <table class="summary-table">
@@ -474,7 +494,6 @@
             return;
         }
 
-        // Ordine cronologico
         checksToRender.sort((a, b) => new Date(a.data) - new Date(b.data));
 
         const daPagare = checksToRender.filter(c => !c.pagato);
@@ -490,7 +509,6 @@
         }
     }
 
-    // Generatore Tabelle (Zebra striping accentuato per Da Pagare, stile attenuato per Pagato)
     function renderTableGroup(datiAssegni, containerDOM, isPagato) {
         if (datiAssegni.length === 0) {
             if(!isPagato) containerDOM.innerHTML = '<p style="text-align:center; color:#7f8c8d; padding:20px; font-weight:bold;">Tutti gli assegni del periodo sono stati pagati. Ottimo lavoro!</p>';
@@ -536,6 +554,7 @@
                 banks.forEach(b => { rowSelectHtml += `<option value="${b}" ${c.banca === b ? 'selected' : ''}>${b}</option>`; });
                 rowSelectHtml += `</select>`;
 
+                // Aggiunta list="lista-beneficiari" e classe "causale-text"
                 html += `
                             <tr class="${rowClass}">
                                 <td>
@@ -551,12 +570,12 @@
                                     <span class="print-only">${c.numero}</span>
                                 </td>
                                 <td>
-                                    <input type="text" class="edit-input no-print" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
+                                    <input type="text" class="edit-input no-print" list="lista-beneficiari" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
                                     <span class="print-only">${c.beneficiario}</span>
                                 </td>
                                 <td>
-                                    <input type="text" class="edit-input no-print" value="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
-                                    <span class="print-only">${c.causale || ''}</span>
+                                    <input type="text" class="edit-input causale-text no-print" value="${c.causale || ''}" title="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
+                                    <span class="print-only causale-text">${c.causale || ''}</span>
                                 </td>
                                 <td style="text-align: right;">
                                     <input type="text" class="edit-input edit-amount no-print" value="${formatCurrency(c.importo)}" onchange="aggiornaCampo('${c.id}', 'importo', this.value)">
