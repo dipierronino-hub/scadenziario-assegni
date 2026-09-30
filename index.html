@@ -6,28 +6,45 @@
     <title>Scadenziario Assegni</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
         h2 { text-align: center; color: #2c3e50; }
         .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
+        
+        /* Stili Form */
+        .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
         label { font-size: 0.9em; font-weight: 600; margin-bottom: 4px; color: #555; }
-        input, select, button { padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; }
+        input, select, button { padding: 10px; font-size: 15px; border: 1px solid #ddd; border-radius: 6px; }
         input:focus, select:focus { outline: none; border-color: #3498db; }
-        .btn-primary { background-color: #3498db; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-secondary { background-color: #ecf0f1; color: #333; border: 1px solid #bdc3c7; margin-top: 10px; cursor: pointer; }
-        .month-group { background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
-        .month-header { background: #2c3e50; color: #fff; padding: 12px 15px; font-size: 1.1em; font-weight: bold; display: flex; justify-content: space-between; }
-        .check-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; }
-        .check-item:last-child { border-bottom: none; }
-        .check-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
-        .date-badge { background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }
-        .bank-badge { background: #f1c40f; color: #333; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
-        .amount { font-size: 1.2em; font-weight: bold; color: #27ae60; }
-        .details { font-size: 0.9em; color: #666; line-height: 1.4; }
-        .delete-btn { color: #e74c3c; cursor: pointer; border: none; background: none; font-size: 0.9em; margin-top: 10px; text-align: left; padding: 0; text-decoration: underline; }
-        .total-row { padding: 15px; background: #fdfefe; text-align: right; font-weight: bold; font-size: 1.1em; border-top: 2px solid #eee; color: #2c3e50; }
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row .form-group { flex: 1; }
+        .btn-primary { background-color: #3498db; color: white; border: none; font-weight: bold; cursor: pointer; height: 100%; margin-top: auto; }
+        .btn-secondary { background-color: #ecf0f1; color: #333; border: 1px solid #bdc3c7; margin-top: 10px; cursor: pointer; width: 100%; }
+
+        /* Stili Scadenziario Orizzontale */
+        .table-responsive { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .month-group { min-width: 1050px; /* Forza la larghezza per stare su una riga */ }
+        .month-header { background: #2c3e50; color: #fff; padding: 12px 15px; font-size: 1.1em; font-weight: bold; }
+        
+        /* Griglia delle righe */
+        .check-row { 
+            display: grid; 
+            grid-template-columns: 100px 200px 120px 1.5fr 1.5fr 120px 80px; 
+            gap: 10px; 
+            align-items: center; 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #eee; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .check-row:hover { background-color: #f8f9fa; }
+        .check-header { background: #ecf0f1; font-weight: bold; font-size: 0.85em; color: #555; text-transform: uppercase; border-bottom: 2px solid #ddd; }
+        
+        /* Elementi della riga */
+        .date-badge { background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; text-align: center; }
+        .bank-badge { font-weight: 600; color: #2c3e50; white-space: normal; line-height: 1.2; }
+        .amount { font-size: 1.1em; font-weight: bold; color: #27ae60; text-align: right; }
+        .text-col { overflow: hidden; text-overflow: ellipsis; }
+        .delete-btn { color: #fff; background-color: #e74c3c; cursor: pointer; border: none; padding: 6px 10px; font-size: 0.8em; border-radius: 4px; font-weight: bold; }
+        
+        .total-row { padding: 15px; background: #fdfefe; text-align: right; font-weight: bold; font-size: 1.2em; border-top: 2px solid #ddd; color: #2c3e50; min-width: 1050px; }
     </style>
 </head>
 <body>
@@ -38,7 +55,7 @@
     <!-- Form Inserimento -->
     <div class="card">
         <form id="checkForm">
-            <div class="flex-row">
+            <div class="form-row">
                 <div class="form-group">
                     <label>Data Scadenza</label>
                     <input type="date" id="data" required>
@@ -47,34 +64,32 @@
                     <label>Importo (€)</label>
                     <input type="number" id="importo" step="0.01" min="0" placeholder="0.00" required>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Banca</label>
-                <select id="banca" required></select>
-            </div>
-
-            <div class="flex-row">
-                <div class="form-group">
-                    <label>Numero Assegno</label>
-                    <input type="text" id="numeroAssegno" placeholder="Es. 123456789" required>
+                <div class="form-group" style="flex: 1.5;">
+                    <label>Banca</label>
+                    <select id="banca" required></select>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label>Beneficiario</label>
-                <input type="text" id="beneficiario" placeholder="A favore di..." required>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Numero Assegno</label>
+                    <input type="text" id="numeroAssegno" placeholder="Es. 123456" required>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Beneficiario</label>
+                    <input type="text" id="beneficiario" placeholder="A favore di..." required>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Causale</label>
+                    <input type="text" id="causale" placeholder="Fattura n... / Rata...">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn-primary">Aggiungi</button>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label>Causale</label>
-                <input type="text" id="causale" placeholder="Fattura n... / Rata...">
-            </div>
-
-            <button type="submit" class="btn-primary">Aggiungi Assegno</button>
         </form>
-        
-        <button class="btn-secondary" onclick="aggiungiBanca()" style="width: 100%;">+ Aggiungi Nuova Banca</button>
+        <button class="btn-secondary" onclick="aggiungiBanca()">+ Aggiungi Nuova Banca</button>
     </div>
 
     <!-- Lista Scadenze -->
@@ -86,8 +101,16 @@
     let banks = JSON.parse(localStorage.getItem('assegni_banks')) || ["Banca Popolare Pugliese", "Banca Popolare di Puglia e Basilicata"];
     let checks = JSON.parse(localStorage.getItem('assegni_data')) || [];
 
-    const formatCurrency = (num) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(num);
+    // Formattazione Numeri: Separatore migliaia e 2 decimali fissi
+    const formatCurrency = (num) => {
+        return new Intl.NumberFormat('it-IT', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        }).format(num) + ' €';
+    };
+
     const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    
     const getMonthYear = (dateStr) => {
         const d = new Date(dateStr);
         return d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }).toUpperCase();
@@ -168,30 +191,45 @@
 
         // Genera HTML
         for (const [month, items] of Object.entries(grouped)) {
-            let html = `<div class="month-group">`;
+            let html = `
+            <div class="table-responsive">
+                <div class="month-group">
+                    <div class="month-header">${month}</div>
+                    
+                    <!-- Intestazione Colonne -->
+                    <div class="check-row check-header">
+                        <div>Data</div>
+                        <div>Banca</div>
+                        <div>N° Assegno</div>
+                        <div>Beneficiario</div>
+                        <div>Causale</div>
+                        <div style="text-align: right;">Importo</div>
+                        <div>Azione</div>
+                    </div>`;
+
             let totaleMese = 0;
-            
-            html += `<div class="month-header"><span>${month}</span></div>`;
             
             items.forEach(c => {
                 totaleMese += c.importo;
                 html += `
-                <div class="check-item">
-                    <div class="check-header">
-                        <span class="date-badge">${formatDate(c.data)}</span>
-                        <span class="amount">${formatCurrency(c.importo)}</span>
-                    </div>
-                    <div class="details">
-                        <strong>N° Assegno:</strong> ${c.numero} <span class="bank-badge">${c.banca}</span><br>
-                        <strong>A favore di:</strong> ${c.beneficiario}<br>
-                        <strong>Causale:</strong> ${c.causale || 'N/A'}
-                    </div>
-                    <button class="delete-btn" onclick="eliminaAssegno('${c.id}')">Elimina</button>
-                </div>`;
+                    <div class="check-row">
+                        <div><span class="date-badge">${formatDate(c.data)}</span></div>
+                        <div class="bank-badge">${c.banca}</div>
+                        <div>${c.numero}</div>
+                        <div class="text-col" title="${c.beneficiario}">${c.beneficiario}</div>
+                        <div class="text-col" title="${c.causale || ''}">${c.causale || '-'}</div>
+                        <div class="amount">${formatCurrency(c.importo)}</div>
+                        <div><button class="delete-btn" onclick="eliminaAssegno('${c.id}')">Elimina</button></div>
+                    </div>`;
             });
 
-            html += `<div class="total-row">Totale Mese: ${formatCurrency(totaleMese)}</div>`;
-            html += `</div>`;
+            html += `
+                    <div class="total-row">
+                        Totale ${month}: ${formatCurrency(totaleMese)}
+                    </div>
+                </div>
+            </div>`;
+            
             container.innerHTML += html;
         }
     }
