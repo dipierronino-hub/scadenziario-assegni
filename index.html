@@ -1,687 +1,365 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scadenziario Assegni</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        /* =========================================
-           STILI APPLICATIVI (SCHERMO)
-           ========================================= */
-        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #ecf0f1; color: #333; margin: 0; padding: 15px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h2 { text-align: center; color: #2c3e50; margin: 10px 0 20px 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid #3498db; }
-        .filter-card { background: #2c3e50; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: none; }
-        
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        
-        button { padding: 10px 16px; font-size: 14px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
-        button:hover { opacity: 0.9; }
-        .btn-primary { background-color: #3498db; color: white; height: 100%; }
-        .btn-secondary { background-color: #e3e7e8; color: #2c3e50; border: 1px solid #bdc3c7; width: 100%; margin-top: 15px; }
-        .btn-pdf { background-color: #e74c3c; color: white; }
-        .btn-print { background-color: #2c3e50; color: white; border: 1px solid #fff; }
-
-        .form-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
-        .form-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; }
-        label { font-size: 0.85em; font-weight: 700; margin-bottom: 6px; color: #555; text-transform: uppercase; }
-        input, select { padding: 10px; font-size: 14px; border: 1px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; background-color: #fcfcfc; }
-        input:focus, select:focus { outline: none; border-color: #3498db; background-color: #fff; box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
-
-        .filter-label { color: white; margin: 0; font-size: 1.1em; font-weight: bold; text-transform: uppercase; }
-        .filter-select { flex: 1; max-width: 400px; font-weight: bold; border: 2px solid #3498db; padding: 12px; font-size: 15px; }
-
-        .summary-section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; border-top: 5px solid #f39c12; }
-        .summary-section h3 { color: #d35400; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; font-size: 1.1em; }
-        .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 0.95em; }
-        .summary-table th, .summary-table td { border: 1px solid #bdc3c7; padding: 12px; text-align: right; }
-        .summary-table th { background-color: #34495e; color: white; text-align: center; }
-        .summary-table td:first-child { text-align: left; font-weight: bold; background-color: #ecf0f1; color: #2c3e50; }
-        .col-emesso { background-color: #fdfefe; }
-        .col-pagato { background-color: #e8f8f5; color: #27ae60; }
-        .col-residuo { background-color: #fdebd0; color: #d35400; font-weight: 900; font-size: 1.05em; }
-
-        .month-group { background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; overflow: hidden; }
-        .month-header { background: #34495e; color: #fff; padding: 15px 20px; font-size: 1.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
-        .header-pagati { background: #27ae60 !important; }
-        
-        .modern-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .modern-table th { background-color: #ecf0f1; color: #2c3e50; font-weight: 800; font-size: 0.85em; text-transform: uppercase; padding: 14px 10px; border-bottom: 3px solid #95a5a6; text-align: left; }
-        
-        .col-data { width: 100px; }
-        .col-banca { width: 160px; }
-        .col-numero { width: 90px; }
-        .col-benef { width: auto; }
-        .col-causale { width: auto; }
-        .col-importo { width: 120px; text-align: right; }
-        .col-azione { width: 80px; text-align: center; }
-        
-        .modern-table td { padding: 10px; border-bottom: 2px solid #aeb6bf; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; }
-        .modern-table tbody tr:nth-child(odd) { background-color: #ffffff; }
-        .modern-table tbody tr:nth-child(even) { background-color: #e3f0f9; }
-        .modern-table tbody tr:hover { background-color: #cce5ff; }
-        
-        .row-pagato:nth-child(odd) { background-color: #e8f8f5 !important; }
-        .row-pagato:nth-child(even) { background-color: #d1f2eb !important; }
-        .row-pagato td { border-bottom: 2px solid #a3e4d7 !important; color: #7f8c8d; }
-        .row-pagato .edit-input { color: #7f8c8d; }
-        .row-pagato .date-input { background-color: #27ae60 !important; }
-        .row-pagato .edit-amount { color: #27ae60 !important; text-decoration: line-through; opacity: 0.8; }
-        
-        .edit-input { width: 100%; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 1em; padding: 6px; border-radius: 4px; box-sizing: border-box; color: #2c3e50; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .edit-input:hover { border-color: #95a5a6; background: #fff; }
-        .edit-input:focus { border-color: #3498db; background: #fff; outline: none; }
-        
-        .causale-text { font-size: 0.82em !important; line-height: 1.2; font-weight: 500; }
-        .edit-amount { text-align: right; font-weight: 900; color: #e74c3c; font-size: 1.1em; }
-        .date-input { background: #e74c3c; color: white; font-weight: bold; text-align: center; border-radius: 4px; padding: 6px; font-size: 0.95em; }
-        
-        .action-cell { display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; }
-        .cb-label { font-size: 0.85em; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #2c3e50; background: #ecf0f1; padding: 4px 8px; border-radius: 4px; width: 100%; box-sizing: border-box; justify-content: center; border: 1px solid #bdc3c7; }
-        .cb-label input { cursor: pointer; transform: scale(1.3); margin: 0; }
-        .delete-btn { color: #fff; background-color: #c0392b; padding: 6px 10px; font-size: 0.8em; border-radius: 4px; font-weight: bold; width: 100%; margin: 0; }
-        
-        .total-row td { padding: 18px 20px; background: #fdfefe; text-align: right; font-weight: 900; font-size: 1.3em; color: #c0392b; border-top: 3px solid #e74c3c; }
-        .total-row-pagati td { border-top: 3px solid #27ae60 !important; color: #27ae60; }
-        
-        /* Contenitore per overflow su schermo */
-        .table-wrapper { overflow-x: auto; width: 100%; }
-
-        .print-only { display: none; }
-        .print-mode .no-print { display: none !important; }
-        .print-mode .print-only { display: inline-block !important; }
-
-        /* =========================================
-           STILI RIGOROSI PER STAMPA E PDF
-           ========================================= */
-        @media print {
-            @page { 
-                size: A4 landscape; 
-                margin: 10mm; 
-            }
-            
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            body { background: #fff; padding: 0; margin: 0; width: 100%; font-size: 11px; }
-            
-            /* Rimozione di limiti, scroll e ombre */
-            .container, .main-container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
-            .card, .summary-section, .month-group, .filter-card { 
-                box-shadow: none !important; 
-                border-radius: 0 !important; 
-                border: none !important; 
-                margin-bottom: 20px !important; 
-            }
-            
-            /* Eliminazione Overflow per evitare il taglio a sinistra/destra */
-            div, .table-wrapper, [style*="overflow"] { 
-                overflow: visible !important; 
-                width: 100% !important; 
-            }
-            
-            /* Forzatura del layout tabellare e ripetizione intestazioni */
-            table, .modern-table, .summary-table { 
-                width: 100% !important; 
-                table-layout: auto !important; 
-                border-collapse: collapse !important; 
-            }
-            thead { display: table-header-group !important; }
-            tfoot { display: table-footer-group !important; }
-            tr { page-break-inside: avoid !important; break-inside: avoid !important; }
-            .month-group { page-break-inside: auto !important; break-inside: auto !important; }
-            
-            /* Titoli visibili col colore forzato */
-            .month-header { 
-                background-color: #34495e !important; 
-                color: #ffffff !important; 
-                padding: 10px 15px !important; 
-                font-size: 14px !important; 
-                font-weight: bold !important; 
-                border: 1px solid #000;
-                border-bottom: none;
-            }
-            .header-pagati { background-color: #27ae60 !important; }
-            .summary-section h3 { color: #000 !important; }
-
-            /* Testi di riga completamente visibili e bordi neri */
-            .modern-table td, .modern-table th, .summary-table td, .summary-table th { 
-                border: 1px solid #000 !important; 
-                padding: 6px 8px !important; 
-                font-size: 11px !important; 
-                background: transparent !important;
-                color: #000 !important;
-                white-space: normal !important; 
-                word-wrap: break-word !important;
-                overflow: visible !important;
-            }
-            .modern-table th { background-color: #f0f0f0 !important; font-weight: bold !important; }
-            .summary-table th { background-color: #e0e0e0 !important; color: #000 !important; }
-            
-            /* Elementi grafici da stampare */
-            .print-only { 
-                display: inline-block !important; 
-                width: 100% !important; 
-                white-space: normal !important; 
-                overflow: visible !important; 
-                text-overflow: clip !important; 
-            }
-            .no-print { display: none !important; }
-            
-            .total-row td { 
-                font-weight: bold !important; 
-                border-top: 2px solid #000 !important; 
-                background-color: #f9f9f9 !important; 
-            }
-            
-            /* Rimuove le dimensioni fisse che sfasano la stampa */
-            .col-data, .col-banca, .col-numero, .col-importo, .col-benef, .col-causale { width: auto !important; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scadenziario Assegni</title>
+<style>
+body{font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#ecf0f1;color:#333;margin:0;padding:15px}
+.container{max-width:1200px;margin:0 auto}
+h2{color:#2c3e50;margin:10px 0;font-size:26px;text-transform:uppercase;letter-spacing:1px}
+.card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:20px;border-top:5px solid #3498db}
+.filter-card{background:#2c3e50;padding:15px 20px;display:flex;align-items:center;gap:15px;flex-wrap:wrap;border:none}
+.filter-label{color:#fff;font-weight:700;margin:0}
+.filter-card select,.filter-card input{flex:1;min-width:180px;max-width:380px;font-weight:700;border:2px solid #3498db;padding:11px}
+.toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.tb-btns{display:flex;gap:8px;flex-wrap:wrap}
+button{padding:10px 14px;font-size:14px;border:1px solid transparent;border-radius:6px;cursor:pointer;font-weight:700}
+button:hover{opacity:.9}
+.btn-primary{background:#3498db;color:#fff;height:100%}
+.btn-secondary{background:#e3e7e8;color:#2c3e50;border-color:#bdc3c7;width:100%;margin-top:15px}
+.btn-pdf{background:#e74c3c;color:#fff}.btn-tool{background:#2c3e50;color:#fff}
+.form-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.form-group{flex:1;min-width:140px;display:flex;flex-direction:column}
+label{font-size:.85em;font-weight:700;margin-bottom:6px;color:#555;text-transform:uppercase}
+input,select{padding:10px;font-size:14px;border:1px solid #bdc3c7;border-radius:6px;box-sizing:border-box;background:#fcfcfc}
+input:focus,select:focus{outline:none;border-color:#3498db;box-shadow:0 0 0 3px rgba(52,152,219,.2)}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.stat{flex:1;min-width:200px;background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.08);font-weight:700;color:#2c3e50}
+.stat b{display:block;font-size:1.3em;margin-top:4px}
+.stat.red b{color:#c0392b}.stat.amber b{color:#d35400}
+.summary-section{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:30px;border-top:5px solid #f39c12}
+.summary-section h3{color:#d35400;margin:0 0 15px;text-transform:uppercase;font-size:1.1em}
+.summary-table{width:100%;border-collapse:collapse;margin-bottom:25px}
+.summary-table th,.summary-table td{border:1px solid #bdc3c7;padding:12px;text-align:right}
+.summary-table th{background:#34495e;color:#fff;text-align:center}
+.summary-table td:first-child{text-align:left;font-weight:700;background:#ecf0f1;color:#2c3e50}
+.col-pagato{background:#e8f8f5;color:#27ae60}
+.col-residuo{background:#fdebd0;color:#d35400;font-weight:900}
+.month-group{background:#fff;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:30px;overflow:hidden}
+.month-header{background:#34495e;color:#fff;padding:15px 20px;font-size:1.2em;font-weight:800;text-transform:uppercase;letter-spacing:2px}
+.header-pagati{background:#27ae60}
+.table-wrapper{overflow-x:auto}
+.modern-table{width:100%;border-collapse:collapse;min-width:900px}
+.modern-table th{background:#ecf0f1;color:#2c3e50;font-weight:800;font-size:.85em;text-transform:uppercase;padding:14px 10px;border-bottom:3px solid #95a5a6;text-align:left}
+.modern-table td{padding:8px 10px;border-bottom:2px solid #aeb6bf;vertical-align:middle}
+.modern-table tbody tr:nth-child(even){background:#e3f0f9}
+.modern-table tbody tr:hover{background:#cce5ff}
+.modern-table tbody tr.scad td:first-child{box-shadow:inset 6px 0 #c0392b}
+.modern-table tbody tr.prox td:first-child{box-shadow:inset 6px 0 #f39c12}
+.modern-table tbody tr.rp{background:#e8f8f5}.modern-table tbody tr.rp:nth-child(even){background:#d1f2eb}
+.rp td{color:#7f8c8d;border-bottom-color:#a3e4d7!important}
+.rp .edit-amount{color:#27ae60;text-decoration:line-through}
+.col-importo,.th-imp{text-align:right!important}
+.col-data{width:125px}.col-num{width:95px}.col-banca{width:170px}.col-azione{width:95px}
+.ei{width:100%;border:1px solid transparent;background:transparent;font:inherit;padding:6px;border-radius:4px;color:#2c3e50;font-weight:600;text-overflow:ellipsis}
+.ei:hover{border-color:#95a5a6;background:#fff}
+.di{background:#e74c3c;color:#fff;text-align:center}.rp .di{background:#27ae60}
+.causale{font-size:.82em}
+.edit-amount{text-align:right;font-weight:900;color:#e74c3c;font-size:1.05em}
+.action-cell{display:flex;flex-direction:column;gap:6px}
+.cb-label{display:flex;align-items:center;justify-content:center;gap:6px;margin:0;padding:4px;background:#ecf0f1;border:1px solid #bdc3c7;border-radius:4px;cursor:pointer;text-transform:none;color:#2c3e50}
+.delete-btn{background:#c0392b;color:#fff;padding:5px;font-size:.8em;width:100%}
+.total-row td{padding:16px 20px;text-align:right;font-weight:900;font-size:1.25em;color:#c0392b;border-top:3px solid #e74c3c}
+.total-row.pg td{color:#27ae60;border-top-color:#27ae60}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2c3e50;color:#fff;padding:12px 18px;border-radius:8px;display:none;gap:14px;align-items:center;z-index:9}
+#toast button{background:#f39c12;color:#fff;padding:6px 12px}
+.po{display:none}
+@media print{
+@page{size:A4 landscape;margin:10mm}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{background:#fff;padding:0;font-size:11px}
+.container{max-width:none}
+.no-print{display:none!important}
+.po{display:inline}
+.summary-section,.month-group{box-shadow:none;border:none;border-radius:0;margin-bottom:16px;overflow:visible}
+.table-wrapper{overflow:visible}
+.modern-table{min-width:0;table-layout:auto}
+thead{display:table-header-group}
+tfoot{display:table-row-group}
+tr{break-inside:avoid}
+.month-header{padding:8px 12px;font-size:14px;break-after:avoid}
+.modern-table td,.modern-table th,.summary-table td,.summary-table th{border:1px solid #000;padding:5px 7px;font-size:11px;color:#000;background:transparent!important;word-wrap:break-word}
+.modern-table th,.summary-table th{background:#e8e8e8!important}
+.modern-table tbody tr{background:#fff!important}
+.modern-table tbody tr td:first-child{box-shadow:none!important}
+.edit-amount{color:#000;font-weight:700}
+.total-row td{border-top:2px solid #000;background:#f4f4f4!important;color:#000;font-size:12px}
+.modern-table td,.modern-table th{width:auto}
+}
+</style>
 </head>
 <body>
-
-<div class="container" id="main-container">
-    <div class="toolbar no-print">
-        <h2>Gestione Assegni</h2>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-print" onclick="window.print()">🖨️ Stampa Documento</button>
-            <button class="btn-pdf" onclick="scaricaPDF()">📄 Salva come PDF</button>
-        </div>
-    </div>
-
-    <datalist id="lista-beneficiari"></datalist>
-
-    <div class="card filter-card no-print">
-        <label class="filter-label">👁️ Visualizza:</label>
-        <select id="filtro-banca" class="filter-select" onchange="renderScadenziario()">
-            <option value="TUTTE">TUTTE LE BANCHE INSIEME</option>
-        </select>
-    </div>
-
-    <div class="card no-print">
-        <form id="checkForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Data Scadenza</label>
-                    <input type="date" id="data" required>
-                </div>
-                <div class="form-group">
-                    <label>Importo</label>
-                    <input type="number" id="importo" step="0.01" min="0" placeholder="Es. 1500.50" required>
-                </div>
-                <div class="form-group" style="flex: 1.5;">
-                    <label>Banca Trassata</label>
-                    <select id="banca" required></select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>N° Assegno</label>
-                    <input type="text" id="numeroAssegno" placeholder="Es. 123456" required>
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>Beneficiario</label>
-                    <input type="text" id="beneficiario" list="lista-beneficiari" placeholder="Inizia a digitare..." autocomplete="off" required>
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>Causale</label>
-                    <input type="text" id="causale" placeholder="Fattura n... / Rata...">
-                </div>
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button type="submit" class="btn-primary">Registra Assegno</button>
-                </div>
-            </div>
-        </form>
-        <button class="btn-secondary" onclick="aggiungiBanca()">+ Aggiungi Nuova Banca in Rubrica</button>
-    </div>
-
-    <div id="riepilogo-contabile" class="summary-section"></div>
-
-    <div id="scadenziario-da-pagare"></div>
-
-    <div id="sezione-pagati" style="display: none;">
-        <h2 style="color: #27ae60; margin-top: 40px; border-bottom: 4px solid #27ae60; padding-bottom: 10px; text-align: left; font-size: 24px;">✅ Storico Assegni Pagati</h2>
-        <div id="scadenziario-pagati"></div>
-    </div>
+<div class="container">
+<div class="toolbar no-print">
+<h2>Gestione Assegni</h2>
+<div class="tb-btns">
+<button class="btn-tool" onclick="esportaJSON()">💾 Backup</button>
+<button class="btn-tool" onclick="document.getElementById('imp').click()">📂 Ripristina</button>
+<button class="btn-tool" onclick="esportaCSV()">📊 CSV</button>
+<button class="btn-pdf" onclick="stampa()">📄 Stampa / PDF</button>
+<input type="file" id="imp" accept=".json" hidden>
 </div>
+</div>
+<datalist id="lista-beneficiari"></datalist>
+<div class="card filter-card no-print">
+<label class="filter-label">👁️ Visualizza:</label>
+<select id="filtro-banca"><option value="TUTTE">TUTTE LE BANCHE INSIEME</option></select>
+<input type="search" id="cerca" placeholder="🔎 Cerca beneficiario, numero, causale">
+</div>
+<div class="card no-print">
+<form id="checkForm">
+<div class="form-row">
+<div class="form-group"><label>Data Scadenza</label><input type="date" id="data" required></div>
+<div class="form-group"><label>Importo</label><input type="number" id="importo" step="0.01" min="0" placeholder="Es. 1500.50" required></div>
+<div class="form-group" style="flex:1.5"><label>Banca Trassata</label><select id="banca" required></select></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>N° Assegno</label><input type="text" id="numeroAssegno" placeholder="Es. 123456" required></div>
+<div class="form-group" style="flex:2"><label>Beneficiario</label><input type="text" id="beneficiario" list="lista-beneficiari" autocomplete="off" required></div>
+<div class="form-group" style="flex:2"><label>Causale</label><input type="text" id="causale" placeholder="Fattura n... / Rata..."></div>
+<div class="form-group"><label>&nbsp;</label><button type="submit" class="btn-primary">Registra Assegno</button></div>
+</div>
+</form>
+<button class="btn-secondary" onclick="aggiungiBanca()">+ Aggiungi Nuova Banca in Rubrica</button>
+</div>
+<div class="stats no-print" id="stats"></div>
+<div id="riepilogo" class="summary-section"></div>
+<div id="da-pagare"></div>
+<div id="sezione-pagati" style="display:none">
+<h2 style="color:#27ae60;margin-top:40px;border-bottom:4px solid #27ae60;padding-bottom:10px;font-size:24px">✅ Storico Assegni Pagati</h2>
+<div id="pagati"></div>
+</div>
+</div>
+<div id="toast"><span id="toast-msg"></span><button id="toast-undo">Annulla</button></div>
 
 <script>
-    const bancaPredefinita = "Banca Popolare di Puglia e Basilicata";
-    let banks = JSON.parse(localStorage.getItem('assegni_banks')) || [bancaPredefinita, "Banca Popolare Pugliese"];
-    let checks = JSON.parse(localStorage.getItem('assegni_data')) || [];
+const B0="Banca Popolare di Puglia e Basilicata";
+const MESI=["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
+const SEED=`09-30|2360.37|72802|ADESITAL SPA|FT. N. 3613 DEL 12/06/25+4078+1897
+09-30|4740.41|72921|ITALCER SPA|S/ORDINE N.6101+6018 DEL 02/03/26
+09-30|4000.00|73510|ERREDI SRL|S/FT. N. 170 DEL 31/03/26
+09-30|3500.00|73997|EKORU SRL|S/FT. N. 854 DEL 15/04/26
+09-30|3555.08|74201|PROGETTOMATERIA SRL|FT. N. 260195 DEL 30/04/26
+09-30|1961.15|74921|GSG CERAMIC DESIGN SRL|FT.N.549 DEL 09/03/26+FT.739
+09-30|2476.88|74922|AD TILES SRL|FT.N. 159 DEL 24/03/26
+10-02|2000.00|74924|GRUPPO GEROMIN SRL|FT. N. 559 DEL 26/01/26+N.828+2648
+10-02|5000.00|75136|FASSA SRL|S/FT.+N.C. DA FEBBRAIO A GIUGNO
+10-07|2848.01|74734|IGIEMME SRL|FT.N.1381 DEL20/05/26+1510 - NC 72
+10-10|2853.31|74207|CARDINALE FERRAMENTA SPA|FT.N.20863 DEL 14/04/26+FT.26196 -N.C.
+10-10|1579.46|75465|DIANFLEX SRL|FT. N. 31568+23822
+10-15|2001.81|74738|CVR SPA|S/FT.N.3345 DEL 31/05/26
+10-16|3063.05|74927|F.E.A.T. SRL|FT. N. 2001 DEL 31/05/26
+10-16|2532.43|75469|IDROLINEA ZUPO SRL|FT. N. 50+201+273+358+426-NC.27/A
+10-16|1150.27|7619|TSC EDILIZIA SRL|ACC.FT.N. 367 DEL 30/04/26 (R.B. 10/08)
+10-20|5644.94|74209|PROGETTOMATERIA SRL|FT. N. 260241 DEL 25/05/26
+10-20|3486.63|75134|CVR SPA|S/FT.N. 4127 DEL 30/06/26
+10-21|3937.68|74511|EKORU SRL|S/FT. N. 1144 DEL 15/05/26
+10-21|4369.39|74512|PROGETTOMATERIA SRL|C/FT. N. 299 DEL 05/06/26
+10-26|2794.04|75137|FASSA SRL|S/FT.+N.C. DA FEBBRAIO A GIUGNO
+10-27|1286.28|74739|CARDINALE FERRAMENTA SPA|FT.N.28617 DEL 18/05/26+3001+31290+3314
+10-31|6000.00|74513|PROGETTOMATERIA SRL|S/FT.N.299+FT.N.249 DEL 28/05/26
+10-31|3266.50|74205|ERREDI SRL|FT. N. 234 DEL 28/04/26
+10-31|2280.86|74731|PROGETTOMATERIA SRL|FT. N. 260313 DEL 16/06/26
+10-31|3366.96|74925|GRUPPO GEROMIN SRL|FT.N.2648 DEL 23/03/26+3291
+10-31|3185.02|74926|LATERFIAMMA SRL|FT. N. 387 DEL 31/03/26
+10-31|1516.87|75463|FORTE SRL|FT. N. 1795 DEL 30/04/26+SPESE
+10-31|2829.03|75464|EKORU SRL|FT. N. 1402 DEL 15/06/26
+11-05|2561.70|75467|FIMA CARLO FRATTINI SPA|FT. N. 5308+8226+11308+12214
+11-05|1537.63|7833|FORTE SRL|FT.N.2382 DEL 31/05/26
+11-09|1975.56|74740|CARDINALE FERRAMENTA SPA|FT.N.27913-NC. 27221 DEL 06/05/26
+11-10|3637.65|75138|FASSA SRL|S/FT.+N.C. DA FEBBRAIO A GIUGNO
+11-10|6000.00|7831|CVR SPA|FT. N. 4876 DEL 31/07/26
+11-10|2211.45|7620|DIANFLEX SRL|R.B. AL 10/08/26+10/09/26+ACC. SU FT. SUCCESSIV
+11-12|1961.15|75468|GSG CERAMIC DESIGN SRL|FT.N. 549+739
+11-15|1239.36|75466|NAICI ITALIA SRL|FT. N. 4875 DEL 21/07/26
+11-16|883.37|728361|HIDROS POINT SRL|FT. N. 13394 DEL 21/07/26
+11-20|1432.59|74733|NAICI ITALIA SRL|FT. N. 3870 DEL 16/06/26
+11-20|1759.15|74735|CARDINALE GROUP SRL|FT.N.22698 DEL 14/05/15+24567
+11-20|7020.22|74928|PROGETTOMATERIA SRL|FT. N. 260319 DEL 24/06/26
+11-27|3739.35|75139|FASSA SRL|S/FT.+N.C. DA FEBBRAIO A GIUGNO
+11-30|2729.61|75470|THE ITALIAN DECKING COMPANY SPA|FT. N. 8958 DEL 20/08/26
+11-30|2500.00|727837|ICOBIT ITALIA SRL|FT. N. 3501 DEL 06/07/26
+12-05|2000.00|7834|FORTE SRL|FT.N. 2382 DEL 31/05/26
+12-10|3285.38|75462|CARDINALE FERRAMENTA SPA|FT.N.35649+36612+38296+40534
+12-11|3518.00|75140|FASSA SRL|S/FT.+N.C. DA FEBBRAIO A GIUGNO
+12-11|6561.66|7832|CVR SPA|S/FT. N. 4876 DEL 31/07/26
+12-14|2000.00|74516|HERBERIA S.P.A.|FT.N. 7154 +7190 DEL 30/06/26
+12-15|2443.21|75461|IGIEMME SRL|FTN, 2084 DEL 20/07/26
+12-18|3019.59|7614|CARDINALE FERRAMENTA SPA|FT.N.43102 DEL 13/07/26+43051+43725`;
 
-    if (!localStorage.getItem('force_bppb_v4')) {
-        checks.forEach(c => { c.banca = bancaPredefinita; });
-        localStorage.setItem('force_bppb_v4', 'true');
-        localStorage.setItem('assegni_data', JSON.stringify(checks));
-    }
-    
-    checks.forEach(c => {
-        if(typeof c.pagato === 'undefined') c.pagato = false;
-    });
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const cents=n=>Math.round((+n||0)*100);
+const fmt=c=>{const a=Math.abs(c);return(c<0?'-':'')+Math.floor(a/100).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+String(a%100).padStart(2,'0')+' €'};
+const fd=s=>s?s.split('-').reverse().join('/'):'';
+const monthLabel=k=>{const[y,m]=k.split('-');return MESI[+m-1]+' '+y};
+const parseImp=v=>Math.round((parseFloat(String(v).replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''))||0)*100)/100;
+const isoDay=d=>{const p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
 
-    if (checks.length === 0) {
-        const assegniMassivi = [
-            { id: "m1", data: "2026-09-30", importo: 2360.37, banca: bancaPredefinita, numero: "72802", beneficiario: "ADESITAL SPA", causale: "FT. N. 3613 DEL 12/06/25+4078+1897", pagato: false },
-            { id: "m2", data: "2026-09-30", importo: 4740.41, banca: bancaPredefinita, numero: "72921", beneficiario: "ITALCER SPA", causale: "S/ORDINE N.6101+6018 DEL 02/03/26", pagato: false },
-            { id: "m3", data: "2026-09-30", importo: 4000.00, banca: bancaPredefinita, numero: "73510", beneficiario: "ERREDI SRL", causale: "S/FT. N. 170 DEL 31/03/26", pagato: false },
-            { id: "m4", data: "2026-09-30", importo: 3500.00, banca: bancaPredefinita, numero: "73997", beneficiario: "EKORU SRL", causale: "S/FT. N. 854 DEL 15/04/26", pagato: false },
-            { id: "m5", data: "2026-09-30", importo: 3555.08, banca: bancaPredefinita, numero: "74201", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260195 DEL 30/04/26", pagato: false },
-            { id: "m6", data: "2026-09-30", importo: 1961.15, banca: bancaPredefinita, numero: "74921", beneficiario: "GSG CERAMIC DESIGN SRL", causale: "FT.N.549 DEL 09/03/26+FT.739", pagato: false },
-            { id: "m7", data: "2026-09-30", importo: 2476.88, banca: bancaPredefinita, numero: "74922", beneficiario: "AD TILES SRL", causale: "FT.N. 159 DEL 24/03/26", pagato: false },
-            { id: "m8", data: "2026-10-02", importo: 2000.00, banca: bancaPredefinita, numero: "74924", beneficiario: "GRUPPO GEROMIN SRL", causale: "FT. N. 559 DEL 26/01/26+N.828+2648", pagato: false },
-            { id: "m9", data: "2026-10-02", importo: 5000.00, banca: bancaPredefinita, numero: "75136", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO", pagato: false },
-            { id: "m10", data: "2026-10-07", importo: 2848.01, banca: bancaPredefinita, numero: "74734", beneficiario: "IGIEMME SRL", causale: "FT.N.1381 DEL20/05/26+1510 - NC 72", pagato: false },
-            { id: "m11", data: "2026-10-10", importo: 2853.31, banca: bancaPredefinita, numero: "74207", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.20863 DEL 14/04/26+FT.26196 -N.C.", pagato: false },
-            { id: "m12", data: "2026-10-10", importo: 1579.46, banca: bancaPredefinita, numero: "75465", beneficiario: "DIANFLEX SRL", causale: "FT. N. 31568+23822", pagato: false },
-            { id: "m13", data: "2026-10-15", importo: 2001.81, banca: bancaPredefinita, numero: "74738", beneficiario: "CVR SPA", causale: "S/FT.N.3345 DEL 31/05/26", pagato: false },
-            { id: "m14", data: "2026-10-16", importo: 3063.05, banca: bancaPredefinita, numero: "74927", beneficiario: "F.E.A.T. SRL", causale: "FT. N. 2001 DEL 31/05/26", pagato: false },
-            { id: "m15", data: "2026-10-16", importo: 2532.43, banca: bancaPredefinita, numero: "75469", beneficiario: "IDROLINEA ZUPO SRL", causale: "FT. N. 50+201+273+358+426-NC.27/A", pagato: false },
-            { id: "m16", data: "2026-10-16", importo: 1150.27, banca: bancaPredefinita, numero: "7619", beneficiario: "TSC EDILIZIA SRL", causale: "ACC.FT.N. 367 DEL 30/04/26 (R.B. 10/08)", pagato: false },
-            { id: "m17", data: "2026-10-20", importo: 5644.94, banca: bancaPredefinita, numero: "74209", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260241 DEL 25/05/26", pagato: false },
-            { id: "m18", data: "2026-10-20", importo: 3486.63, banca: bancaPredefinita, numero: "75134", beneficiario: "CVR SPA", causale: "S/FT.N. 4127 DEL 30/06/26", pagato: false },
-            { id: "m19", data: "2026-10-21", importo: 3937.68, banca: bancaPredefinita, numero: "74511", beneficiario: "EKORU SRL", causale: "S/FT. N. 1144 DEL 15/05/26", pagato: false },
-            { id: "m20", data: "2026-10-21", importo: 4369.39, banca: bancaPredefinita, numero: "74512", beneficiario: "PROGETTOMATERIA SRL", causale: "C/FT. N. 299 DEL 05/06/26", pagato: false },
-            { id: "m21", data: "2026-10-26", importo: 2794.04, banca: bancaPredefinita, numero: "75137", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO", pagato: false },
-            { id: "m22", data: "2026-10-27", importo: 1286.28, banca: bancaPredefinita, numero: "74739", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.28617 DEL 18/05/26+3001+31290+3314", pagato: false },
-            { id: "m23", data: "2026-10-31", importo: 6000.00, banca: bancaPredefinita, numero: "74513", beneficiario: "PROGETTOMATERIA SRL", causale: "S/FT.N.299+FT.N.249 DEL 28/05/26", pagato: false },
-            { id: "m24", data: "2026-10-31", importo: 3266.50, banca: bancaPredefinita, numero: "74205", beneficiario: "ERREDI SRL", causale: "FT. N. 234 DEL 28/04/26", pagato: false },
-            { id: "m25", data: "2026-10-31", importo: 2280.86, banca: bancaPredefinita, numero: "74731", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260313 DEL 16/06/26", pagato: false },
-            { id: "m26", data: "2026-10-31", importo: 3366.96, banca: bancaPredefinita, numero: "74925", beneficiario: "GRUPPO GEROMIN SRL", causale: "FT.N.2648 DEL 23/03/26+3291", pagato: false },
-            { id: "m27", data: "2026-10-31", importo: 3185.02, banca: bancaPredefinita, numero: "74926", beneficiario: "LATERFIAMMA SRL", causale: "FT. N. 387 DEL 31/03/26", pagato: false },
-            { id: "m28", data: "2026-10-31", importo: 1516.87, banca: bancaPredefinita, numero: "75463", beneficiario: "FORTE SRL", causale: "FT. N.  1795 DEL 30/04/26+SPESE", pagato: false },
-            { id: "m29", data: "2026-10-31", importo: 2829.03, banca: bancaPredefinita, numero: "75464", beneficiario: "EKORU SRL", causale: "FT. N. 1402 DEL 15/06/26", pagato: false },
-            { id: "m30", data: "2026-11-05", importo: 2561.70, banca: bancaPredefinita, numero: "75467", beneficiario: "FIMA CARLO FRATTINI SPA", causale: "FT. N. 5308+8226+11308+12214", pagato: false },
-            { id: "m31", data: "2026-11-05", importo: 1537.63, banca: bancaPredefinita, numero: "7833", beneficiario: "FORTE SRL", causale: "FT.N.2382 DEL 31/05/26", pagato: false },
-            { id: "m32", data: "2026-11-09", importo: 1975.56, banca: bancaPredefinita, numero: "74740", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.27913-NC. 27221 DEL 06/05/26", pagato: false },
-            { id: "m33", data: "2026-11-10", importo: 3637.65, banca: bancaPredefinita, numero: "75138", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO", pagato: false },
-            { id: "m34", data: "2026-11-10", importo: 6000.00, banca: bancaPredefinita, numero: "7831", beneficiario: "CVR SPA", causale: "FT. N. 4876 DEL 31/07/26", pagato: false },
-            { id: "m35", data: "2026-11-10", importo: 2211.45, banca: bancaPredefinita, numero: "7620", beneficiario: "DIANFLEX SRL", causale: "R.B. AL 10/08/26+10/09/26+ACC. SU FT. SUCCESSIV", pagato: false },
-            { id: "m36", data: "2026-11-12", importo: 1961.15, banca: bancaPredefinita, numero: "75468", beneficiario: "GSG CERAMIC DESIGN SRL", causale: "FT.N. 549+739", pagato: false },
-            { id: "m37", data: "2026-11-15", importo: 1239.36, banca: bancaPredefinita, numero: "75466", beneficiario: "NAICI ITALIA SRL", causale: "FT. N. 4875 DEL 21/07/26", pagato: false },
-            { id: "m38", data: "2026-11-16", importo: 883.37, banca: bancaPredefinita, numero: "728361", beneficiario: "HIDROS POINT SRL", causale: "FT. N. 13394 DEL 21/07/26", pagato: false },
-            { id: "m39", data: "2026-11-20", importo: 1432.59, banca: bancaPredefinita, numero: "74733", beneficiario: "NAICI ITALIA SRL", causale: "FT. N. 3870  DEL 16/06/26", pagato: false },
-            { id: "m40", data: "2026-11-20", importo: 1759.15, banca: bancaPredefinita, numero: "74735", beneficiario: "CARDINALE GROUP SRL", causale: "FT.N.22698 DEL 14/05/15+24567", pagato: false },
-            { id: "m41", data: "2026-11-20", importo: 7020.22, banca: bancaPredefinita, numero: "74928", beneficiario: "PROGETTOMATERIA SRL", causale: "FT. N. 260319 DEL 24/06/26", pagato: false },
-            { id: "m42", data: "2026-11-27", importo: 3739.35, banca: bancaPredefinita, numero: "75139", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO", pagato: false },
-            { id: "m43", data: "2026-11-30", importo: 2729.61, banca: bancaPredefinita, numero: "75470", beneficiario: "THE ITALIAN DECKING COMPANY SPA", causale: "FT. N. 8958 DEL 20/08/26", pagato: false },
-            { id: "m44", data: "2026-11-30", importo: 2500.00, banca: bancaPredefinita, numero: "727837", beneficiario: "ICOBIT ITALIA SRL", causale: "FT. N. 3501 DEL 06/07/26", pagato: false },
-            { id: "m45", data: "2026-12-05", importo: 2000.00, banca: bancaPredefinita, numero: "7834", beneficiario: "FORTE SRL", causale: "FT.N. 2382 DEL 31/05/26", pagato: false },
-            { id: "m46", data: "2026-12-10", importo: 3285.38, banca: bancaPredefinita, numero: "75462", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.35649+36612+38296+40534", pagato: false },
-            { id: "m47", data: "2026-12-11", importo: 3518.00, banca: bancaPredefinita, numero: "75140", beneficiario: "FASSA SRL", causale: "S/FT.+N.C. DA FEBBRAIO A GIUGNO", pagato: false },
-            { id: "m48", data: "2026-12-11", importo: 6561.66, banca: bancaPredefinita, numero: "7832", beneficiario: "CVR SPA", causale: "S/FT. N. 4876 DEL 31/07/26", pagato: false },
-            { id: "m49", data: "2026-12-14", importo: 2000.00, banca: bancaPredefinita, numero: "74516", beneficiario: "HERBERIA S.P.A.", causale: "FT.N. 7154 +7190 DEL 30/06/26", pagato: false },
-            { id: "m50", data: "2026-12-15", importo: 2443.21, banca: bancaPredefinita, numero: "75461", beneficiario: "IGIEMME SRL", causale: "FTN, 2084 DEL 20/07/26", pagato: false },
-            { id: "m51", data: "2026-12-18", importo: 3019.59, banca: bancaPredefinita, numero: "7614", beneficiario: "CARDINALE FERRAMENTA SPA", causale: "FT.N.43102 DEL 13/07/26+43051+43725", pagato: false }
-        ];
-        checks = [...assegniMassivi];
-        localStorage.setItem('assegni_data', JSON.stringify(checks));
-    }
+let banks=load('assegni_banks',[B0,"Banca Popolare Pugliese"]);
+let checks=load('assegni_data',[]);
+if(!Array.isArray(checks)||!checks.length){
+  checks=SEED.split('\n').map((r,i)=>{const[d,imp,n,b,c]=r.split('|');return{id:'m'+(i+1),data:'2026-'+d,importo:+imp,banca:B0,numero:n,beneficiario:b,causale:c,pagato:false}});
+  salva();
+}
+checks.forEach(c=>{if(c.pagato===undefined)c.pagato=false});
 
-    const formatCurrency = (num) => {
-        let numStr = parseFloat(num).toFixed(2); 
-        let parts = numStr.split('.'); 
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
-        return parts.join(',') + ' €'; 
-    };
+function salva(){localStorage.setItem('assegni_data',JSON.stringify(checks))}
+function salvaERender(){salva();aggiornaBeneficiari();render()}
 
-    const formatDate = (dateStr) => {
-        if (!dateStr) return '';
-        const [y, m, d] = dateStr.split('-');
-        return `${d}/${m}/${y}`;
-    };
+function aggiornaBeneficiari(){
+  const dl=$('lista-beneficiari');
+  dl.innerHTML=[...new Set(checks.map(c=>(c.beneficiario||'').trim()))].filter(Boolean).sort().map(n=>`<option value="${esc(n)}">`).join('');
+}
+function aggiornaBanche(){
+  const cur=$('filtro-banca').value||'TUTTE';
+  $('banca').innerHTML=banks.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');
+  $('filtro-banca').innerHTML='<option value="TUTTE">TUTTE LE BANCHE INSIEME</option>'+banks.map(b=>`<option value="${esc(b)}">Solo ${esc(b.toUpperCase())}</option>`).join('');
+  $('filtro-banca').value=(cur==='TUTTE'||banks.includes(cur))?cur:'TUTTE';
+}
+function aggiungiBanca(){
+  const n=(prompt("Inserisci il nome della nuova Banca:")||'').trim();
+  if(n&&!banks.includes(n)){banks.push(n);localStorage.setItem('assegni_banks',JSON.stringify(banks));aggiornaBanche();render()}
+}
+function duplicato(numero,banca,ignoraId){
+  return checks.some(c=>c.id!==ignoraId&&c.banca===banca&&String(c.numero).trim()===String(numero).trim());
+}
 
-    const getMonthYearStr = (dateStr) => {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }).toUpperCase();
-    };
+$('checkForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const numero=$('numeroAssegno').value.trim(),banca=$('banca').value;
+  if(duplicato(numero,banca)&&!confirm(`L'assegno n° ${numero} esiste già per questa banca. Registrarlo comunque?`))return;
+  checks.push({id:Date.now().toString(),data:$('data').value,importo:Math.round(parseFloat($('importo').value)*100)/100,banca,numero,beneficiario:$('beneficiario').value.trim(),causale:$('causale').value,pagato:false});
+  salvaERender();e.target.reset();
+});
 
-    function init() {
-        aggiornaSelectBanche();
-        aggiornaListaBeneficiari();
-        renderScadenziario();
-    }
+document.addEventListener('change',e=>{
+  const t=e.target,tr=t.closest&&t.closest('tr[data-id]');
+  if(!tr||!t.dataset.f)return;
+  const c=checks.find(x=>x.id===tr.dataset.id);if(!c)return;
+  const f=t.dataset.f;
+  if(f==='importo')c.importo=parseImp(t.value);
+  else if(f==='pagato')c.pagato=t.checked;
+  else{
+    if(f==='numero'&&duplicato(t.value,c.banca,c.id)&&!confirm(`Il n° ${t.value} esiste già per questa banca. Confermi?`)){t.value=c.numero;return}
+    c[f]=t.value;
+  }
+  salvaERender();
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-del]');if(!b)return;
+  const i=checks.findIndex(c=>c.id===b.dataset.del);if(i<0)return;
+  const[rim]=checks.splice(i,1);salvaERender();
+  toast(`Eliminato: ${rim.beneficiario} ${fmt(cents(rim.importo))}`,()=>{checks.push(rim);salvaERender()});
+});
+let toastT;
+function toast(msg,undo){
+  $('toast-msg').textContent=msg;$('toast').style.display='flex';
+  $('toast-undo').onclick=()=>{undo();$('toast').style.display='none'};
+  clearTimeout(toastT);toastT=setTimeout(()=>$('toast').style.display='none',8000);
+}
 
-    function aggiornaListaBeneficiari() {
-        const datalist = document.getElementById('lista-beneficiari');
-        if(!datalist) return;
-        datalist.innerHTML = '';
-        
-        const nomiUnivoci = [...new Set(checks.map(c => c.beneficiario.trim()))].filter(n => n !== '');
-        nomiUnivoci.sort().forEach(nome => {
-            let option = document.createElement('option');
-            option.value = nome;
-            datalist.appendChild(option);
-        });
-    }
+function riepilogo(dati){
+  const m={},y={};
+  dati.forEach(c=>{
+    const k=c.data.slice(0,7),a=c.data.slice(0,4),v=cents(c.importo);
+    m[k]=m[k]||{e:0,p:0,r:0};y[a]=y[a]||{e:0,p:0,r:0};
+    [m[k],y[a]].forEach(o=>{o.e+=v;c.pagato?o.p+=v:o.r+=v});
+  });
+  const tab=(tit,obj,lab)=>`<h3>${tit}</h3><div class="table-wrapper"><table class="summary-table"><thead><tr><th>${tit.includes('Mens')?'Mese':'Anno'}</th><th>Totale Emesso</th><th class="col-pagato">Già Pagato</th><th class="col-residuo">DA PAGARE (Residuo)</th></tr></thead><tbody>${
+    Object.keys(obj).sort().map(k=>`<tr><td>${lab(k)}</td><td>${fmt(obj[k].e)}</td><td class="col-pagato">${fmt(obj[k].p)}</td><td class="col-residuo">${fmt(obj[k].r)}</td></tr>`).join('')
+  }</tbody></table></div>`;
+  $('riepilogo').innerHTML=dati.length?tab('Situazione Mensile',m,monthLabel)+tab('Situazione Annuale',y,k=>k):'<p>Nessun dato corrispondente al filtro.</p>';
+}
 
-    function aggiornaSelectBanche() {
-        const selectInsert = document.getElementById('banca');
-        const selectFilter = document.getElementById('filtro-banca');
-        
-        const currentFilter = selectFilter.value;
-        
-        selectInsert.innerHTML = '';
-        selectFilter.innerHTML = '<option value="TUTTE">TUTTE LE BANCHE INSIEME</option>';
-        
-        banks.forEach(b => {
-            selectInsert.innerHTML += `<option value="${b}">${b}</option>`;
-            selectFilter.innerHTML += `<option value="${b}">Solo ${b.toUpperCase()}</option>`;
-        });
-        
-        if (banks.includes(currentFilter) || currentFilter === "TUTTE") {
-            selectFilter.value = currentFilter;
-        }
-    }
+function stato(c,oggi,tra7){
+  if(c.pagato)return'rp';
+  return c.data<oggi?'scad':c.data<=tra7?'prox':'';
+}
 
-    function aggiungiBanca() {
-        const nuova = prompt("Inserisci il nome della nuova Banca:");
-        if (nuova && nuova.trim() !== "") {
-            banks.push(nuova.trim());
-            localStorage.setItem('assegni_banks', JSON.stringify(banks));
-            aggiornaSelectBanche();
-            renderScadenziario();
-        }
-    }
+function riga(c,oggi,tra7){
+  const opts=banks.map(b=>`<option value="${esc(b)}"${c.banca===b?' selected':''}>${esc(b)}</option>`).join('');
+  return`<tr data-id="${esc(c.id)}" class="${stato(c,oggi,tra7)}">
+<td class="col-data"><input type="date" class="ei di no-print" data-f="data" value="${esc(c.data)}"><b class="po">${fd(c.data)}</b></td>
+<td class="col-banca"><select class="ei no-print" data-f="banca">${opts}</select><span class="po">${esc(c.banca)}</span></td>
+<td class="col-num"><input type="text" class="ei no-print" data-f="numero" value="${esc(c.numero)}"><span class="po">${esc(c.numero)}</span></td>
+<td><input type="text" class="ei no-print" data-f="beneficiario" list="lista-beneficiari" value="${esc(c.beneficiario)}" title="${esc(c.beneficiario)}"><span class="po">${esc(c.beneficiario)}</span></td>
+<td><input type="text" class="ei causale no-print" data-f="causale" value="${esc(c.causale)}" title="${esc(c.causale)}"><span class="po causale">${esc(c.causale)}</span></td>
+<td class="col-importo"><input type="text" class="ei edit-amount no-print" data-f="importo" value="${fmt(cents(c.importo))}"><span class="po edit-amount">${fmt(cents(c.importo))}</span></td>
+<td class="col-azione no-print"><div class="action-cell"><label class="cb-label"><input type="checkbox" data-f="pagato"${c.pagato?' checked':''}> Pagato</label><button class="delete-btn" data-del="${esc(c.id)}">Elimina</button></div></td>
+</tr>`;
+}
 
-    document.getElementById('checkForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const check = {
-            id: Date.now().toString(),
-            data: document.getElementById('data').value,
-            importo: parseFloat(document.getElementById('importo').value),
-            banca: document.getElementById('banca').value,
-            numero: document.getElementById('numeroAssegno').value,
-            beneficiario: document.getElementById('beneficiario').value,
-            causale: document.getElementById('causale').value,
-            pagato: false
-        };
-        checks.push(check);
-        saveAndRender();
-        this.reset();
-    });
+function gruppi(dati,cont,pagato){
+  const g={};
+  dati.forEach(c=>(g[c.data.slice(0,7)]=g[c.data.slice(0,7)]||[]).push(c));
+  const oggi=isoDay(new Date()),t=new Date();t.setDate(t.getDate()+7);const tra7=isoDay(t);
+  cont.innerHTML=Object.keys(g).sort().map(k=>{
+    const tot=g[k].reduce((s,c)=>s+cents(c.importo),0);
+    return`<div class="month-group"><div class="month-header${pagato?' header-pagati':''}">${monthLabel(k)}</div><div class="table-wrapper"><table class="modern-table"><thead><tr><th class="col-data">Data</th><th class="col-banca">Banca</th><th class="col-num">N° Assegno</th><th>Beneficiario</th><th>Causale</th><th class="th-imp">Importo</th><th class="col-azione no-print">Stato</th></tr></thead><tbody>${g[k].map(c=>riga(c,oggi,tra7)).join('')}</tbody><tfoot><tr class="total-row${pagato?' pg':''}"><td colspan="5">Totale ${pagato?'Pagato':'DA PAGARE'} ${monthLabel(k)}:</td><td>${fmt(tot)}</td><td class="no-print"></td></tr></tfoot></table></div></div>`;
+  }).join('');
+}
 
-    window.aggiornaCampo = function(id, campo, valore) {
-        const check = checks.find(c => c.id === id);
-        if (check) {
-            if (campo === 'importo') {
-                let numeroPulito = valore.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
-                check.importo = parseFloat(numeroPulito) || 0;
-            } else {
-                check[campo] = valore;
-            }
-            saveAndRender();
-        }
-    };
+function filtrati(){
+  const fb=$('filtro-banca').value,q=$('cerca').value.trim().toLowerCase();
+  return checks.filter(c=>(fb==='TUTTE'||c.banca===fb)&&(!q||[c.beneficiario,c.numero,c.causale].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>a.data.localeCompare(b.data));
+}
 
-    window.togglePagato = function(id, isChecked) {
-        const check = checks.find(c => c.id === id);
-        if (check) {
-            check.pagato = isChecked;
-            saveAndRender();
-        }
-    };
+function render(){
+  const dati=filtrati();
+  riepilogo(dati);
+  const oggi=isoDay(new Date()),t=new Date();t.setDate(t.getDate()+7);const tra7=isoDay(t);
+  const np=dati.filter(c=>!c.pagato);
+  const sc=np.filter(c=>c.data<oggi),pr=np.filter(c=>c.data>=oggi&&c.data<=tra7);
+  const somma=a=>fmt(a.reduce((s,c)=>s+cents(c.importo),0));
+  $('stats').innerHTML=`<div class="stat red">Scaduti non pagati (${sc.length})<b>${somma(sc)}</b></div><div class="stat amber">In scadenza entro 7 giorni (${pr.length})<b>${somma(pr)}</b></div><div class="stat">Totale da pagare (${np.length})<b>${somma(np)}</b></div>`;
+  const pag=dati.filter(c=>c.pagato);
+  if(!dati.length){$('da-pagare').innerHTML='<p style="text-align:center;padding:20px">Nessun assegno trovato per questa selezione.</p>';$('sezione-pagati').style.display='none';return}
+  if(np.length)gruppi(np,$('da-pagare'),false);
+  else $('da-pagare').innerHTML='<p style="text-align:center;color:#7f8c8d;padding:20px;font-weight:700">Tutti gli assegni del periodo sono stati pagati.</p>';
+  $('sezione-pagati').style.display=pag.length?'block':'none';
+  if(pag.length)gruppi(pag,$('pagati'),true);
+}
 
-    function eliminaAssegno(id) {
-        if(confirm("Vuoi eliminare questo assegno?")) {
-            checks = checks.filter(c => c.id !== id);
-            saveAndRender();
-        }
-    }
+function stampa(){
+  alert('Nella finestra di stampa scegli "Salva come PDF" (orizzontale) e spunta "Grafica di sfondo" per vedere i colori.');
+  window.print();
+}
+function scarica(nome,tipo,contenuto){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([contenuto],{type:tipo}));
+  a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function esportaJSON(){scarica('backup-assegni-'+isoDay(new Date())+'.json','application/json',JSON.stringify({banks,checks},null,1))}
+function esportaCSV(){
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const righe=[['Data','Banca','Numero','Beneficiario','Causale','Importo','Pagato'].map(q).join(';')]
+    .concat(filtrati().map(c=>[fd(c.data),c.banca,c.numero,c.beneficiario,c.causale,c.importo.toFixed(2).replace('.',','),c.pagato?'SI':'NO'].map(q).join(';')));
+  scarica('assegni-'+isoDay(new Date())+'.csv','text/csv;charset=utf-8','\ufeff'+righe.join('\r\n'));
+}
+$('imp').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||!Array.isArray(d.checks))throw 0;
+      if(!confirm(`Il backup contiene ${d.checks.length} assegni. Sostituire TUTTI i dati attuali?`))return;
+      checks=d.checks.map((c,i)=>({id:String(c.id||Date.now()+'_'+i),data:String(c.data||''),importo:+c.importo||0,banca:String(c.banca||B0),numero:String(c.numero||''),beneficiario:String(c.beneficiario||''),causale:String(c.causale||''),pagato:!!c.pagato}));
+      if(Array.isArray(d.banks)&&d.banks.length){banks=d.banks.map(String);localStorage.setItem('assegni_banks',JSON.stringify(banks))}
+      aggiornaBanche();salvaERender();
+    }catch(err){alert('File di backup non valido.')}
+    e.target.value='';
+  };
+  r.readAsText(f);
+});
+$('filtro-banca').addEventListener('change',render);
+$('cerca').addEventListener('input',render);
 
-    function saveAndRender() {
-        localStorage.setItem('assegni_data', JSON.stringify(checks));
-        aggiornaListaBeneficiari(); 
-        renderScadenziario();
-    }
-
-    function calcolaRiepiloghi(datiFiltrati) {
-        const container = document.getElementById('riepilogo-contabile');
-        if (datiFiltrati.length === 0) {
-            container.innerHTML = '<p>Nessun dato corrispondente al filtro.</p>';
-            return;
-        }
-
-        const totalsByMonth = {};
-        const totalsByYear = {};
-
-        datiFiltrati.forEach(c => {
-            const date = new Date(c.data);
-            const year = date.getFullYear();
-            const monthStr = getMonthYearStr(c.data);
-            
-            if (!totalsByMonth[monthStr]) totalsByMonth[monthStr] = { emesso: 0, pagato: 0, residuo: 0, dateObj: date };
-            if (!totalsByYear[year]) totalsByYear[year] = { emesso: 0, pagato: 0, residuo: 0 };
-
-            totalsByMonth[monthStr].emesso += c.importo;
-            totalsByYear[year].emesso += c.importo;
-
-            if (c.pagato) {
-                totalsByMonth[monthStr].pagato += c.importo;
-                totalsByYear[year].pagato += c.importo;
-            } else {
-                totalsByMonth[monthStr].residuo += c.importo;
-                totalsByYear[year].residuo += c.importo;
-            }
-        });
-
-        let htmlMensile = `
-            <h3>Situazione Mensile</h3>
-            <div class="table-wrapper">
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Mese</th>
-                            <th class="col-emesso">Totale Emesso</th>
-                            <th class="col-pagato">Già Pagato</th>
-                            <th class="col-residuo">DA PAGARE (Residuo)</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-        
-        const sortedMonths = Object.keys(totalsByMonth).sort((a, b) => totalsByMonth[a].dateObj - totalsByMonth[b].dateObj);
-        sortedMonths.forEach(month => {
-            htmlMensile += `
-                <tr>
-                    <td>${month}</td>
-                    <td class="col-emesso">${formatCurrency(totalsByMonth[month].emesso)}</td>
-                    <td class="col-pagato">${formatCurrency(totalsByMonth[month].pagato)}</td>
-                    <td class="col-residuo">${formatCurrency(totalsByMonth[month].residuo)}</td>
-                </tr>`;
-        });
-        htmlMensile += `</tbody></table></div>`;
-
-        let htmlAnnuale = `
-            <h3>Situazione Annuale</h3>
-            <div class="table-wrapper">
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Anno</th>
-                            <th class="col-emesso">Totale Emesso</th>
-                            <th class="col-pagato">Già Pagato</th>
-                            <th class="col-residuo">DA PAGARE (Residuo)</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-                
-        Object.keys(totalsByYear).sort().forEach(year => {
-            htmlAnnuale += `
-                <tr>
-                    <td>${year}</td>
-                    <td class="col-emesso">${formatCurrency(totalsByYear[year].emesso)}</td>
-                    <td class="col-pagato">${formatCurrency(totalsByYear[year].pagato)}</td>
-                    <td class="col-residuo">${formatCurrency(totalsByYear[year].residuo)}</td>
-                </tr>`;
-        });
-        htmlAnnuale += `</tbody></table></div>`;
-
-        container.innerHTML = htmlMensile + htmlAnnuale;
-    }
-
-    // Configurazione aggiornata html2pdf
-    function scaricaPDF() {
-        const container = document.getElementById('main-container');
-        container.classList.add('print-mode');
-        
-        const opt = {
-            margin:       [10, 10, 10, 10],
-            filename:     'contabilita-assegni.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, windowWidth: 1200 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
-            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-        
-        html2pdf().set(opt).from(container).save().then(() => {
-            container.classList.remove('print-mode');
-        });
-    }
-
-    function renderScadenziario() {
-        const filtro = document.getElementById('filtro-banca').value;
-        let checksToRender = checks;
-        if (filtro !== "TUTTE") {
-            checksToRender = checks.filter(c => c.banca === filtro);
-        }
-
-        calcolaRiepiloghi(checksToRender); 
-
-        const containerDaPagare = document.getElementById('scadenziario-da-pagare');
-        const containerPagati = document.getElementById('scadenziario-pagati');
-        const sezionePagati = document.getElementById('sezione-pagati');
-        
-        containerDaPagare.innerHTML = '';
-        containerPagati.innerHTML = '';
-
-        if (checksToRender.length === 0) {
-            containerDaPagare.innerHTML = '<p style="text-align:center; padding: 20px;">Nessun assegno trovato per questa selezione.</p>';
-            sezionePagati.style.display = 'none';
-            return;
-        }
-
-        checksToRender.sort((a, b) => new Date(a.data) - new Date(b.data));
-
-        const daPagare = checksToRender.filter(c => !c.pagato);
-        const pagati = checksToRender.filter(c => c.pagato);
-
-        renderTableGroup(daPagare, containerDaPagare, false);
-        
-        if (pagati.length > 0) {
-            sezionePagati.style.display = 'block';
-            renderTableGroup(pagati, containerPagati, true);
-        } else {
-            sezionePagati.style.display = 'none';
-        }
-    }
-
-    function renderTableGroup(datiAssegni, containerDOM, isPagato) {
-        if (datiAssegni.length === 0) {
-            if(!isPagato) containerDOM.innerHTML = '<p style="text-align:center; color:#7f8c8d; padding:20px; font-weight:bold;">Tutti gli assegni del periodo sono stati pagati.</p>';
-            return;
-        }
-
-        const grouped = {};
-        datiAssegni.forEach(c => {
-            const my = getMonthYearStr(c.data);
-            if (!grouped[my]) grouped[my] = [];
-            grouped[my].push(c);
-        });
-
-        const rowClass = isPagato ? 'row-pagato' : '';
-        const headerClass = isPagato ? 'header-pagati' : '';
-        const totalRowClass = isPagato ? 'total-row-pagati' : '';
-
-        for (const [month, items] of Object.entries(grouped)) {
-            let html = `
-            <div class="month-group">
-                <div class="month-header ${headerClass}">${month}</div>
-                <div class="table-wrapper">
-                    <table class="modern-table">
-                        <thead>
-                            <tr>
-                                <th class="col-data">Data</th>
-                                <th class="col-banca">Banca</th>
-                                <th class="col-numero">N° Assegno</th>
-                                <th class="col-benef">Beneficiario</th>
-                                <th class="col-causale">Causale</th>
-                                <th class="col-importo">Importo</th>
-                                <th class="col-azione no-print">Stato</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-
-            let totaleMese = 0;
-            
-            items.forEach(c => {
-                totaleMese += c.importo;
-                
-                let rowSelectHtml = `<select class="edit-input no-print" onchange="aggiornaCampo('${c.id}', 'banca', this.value)">`;
-                banks.forEach(b => { rowSelectHtml += `<option value="${b}" ${c.banca === b ? 'selected' : ''}>${b}</option>`; });
-                rowSelectHtml += `</select>`;
-
-                html += `
-                            <tr class="${rowClass}">
-                                <td class="col-data">
-                                    <input type="date" class="edit-input date-input no-print" value="${c.data}" onchange="aggiornaCampo('${c.id}', 'data', this.value)">
-                                    <span class="print-only" style="font-weight:bold;">${formatDate(c.data)}</span>
-                                </td>
-                                <td class="col-banca">
-                                    ${rowSelectHtml}
-                                    <span class="print-only">${c.banca}</span>
-                                </td>
-                                <td class="col-numero">
-                                    <input type="text" class="edit-input no-print" value="${c.numero}" onchange="aggiornaCampo('${c.id}', 'numero', this.value)">
-                                    <span class="print-only">${c.numero}</span>
-                                </td>
-                                <td class="col-benef">
-                                    <input type="text" class="edit-input no-print" list="lista-beneficiari" value="${c.beneficiario}" onchange="aggiornaCampo('${c.id}', 'beneficiario', this.value)">
-                                    <span class="print-only" title="${c.beneficiario}">${c.beneficiario}</span>
-                                </td>
-                                <td class="col-causale">
-                                    <input type="text" class="edit-input causale-text no-print" value="${c.causale || ''}" title="${c.causale || ''}" onchange="aggiornaCampo('${c.id}', 'causale', this.value)">
-                                    <span class="print-only causale-text" title="${c.causale || ''}">${c.causale || ''}</span>
-                                </td>
-                                <td class="col-importo">
-                                    <input type="text" class="edit-input edit-amount no-print" value="${formatCurrency(c.importo)}" onchange="aggiornaCampo('${c.id}', 'importo', this.value)">
-                                    <span class="print-only edit-amount">${formatCurrency(c.importo)}</span>
-                                </td>
-                                <td class="col-azione no-print">
-                                    <div class="action-cell">
-                                        <label class="cb-label">
-                                            <input type="checkbox" onchange="togglePagato('${c.id}', this.checked)" ${c.pagato ? 'checked' : ''}> Pagato
-                                        </label>
-                                        <button class="delete-btn" onclick="eliminaAssegno('${c.id}')">Elimina</button>
-                                    </div>
-                                </td>
-                            </tr>`;
-            });
-
-            html += `
-                        </tbody>
-                        <tfoot>
-                            <tr class="total-row ${totalRowClass}">
-                                <td colspan="5">Totale ${isPagato ? 'Pagato' : 'DA PAGARE'} ${month}:</td>
-                                <td>${formatCurrency(totaleMese)}</td>
-                                <td class="no-print"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>`;
-            
-            containerDOM.innerHTML += html;
-        }
-    }
-
-    init();
+aggiornaBanche();aggiornaBeneficiari();render();
 </script>
 </body>
 </html>
